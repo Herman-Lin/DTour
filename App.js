@@ -18,15 +18,16 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-type Props = {};
-export default class App extends Component<Props> {
-   
+export default class App extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {textValue: 'JSON Response will be shown'};
+  }
    places_search = (search_str, latitude, longitude) => {
      const Http = new XMLHttpRequest();
      url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + String(latitude) + "," + String(longitude) + "&radius=40000" + "&keyword=" + encodeURIComponent(search_str) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M";
      Http.open("GET", url);
      Http.send();
-     console.log('sent');
      Http.onreadystatechange = e => {
        if (Http.readyState == 4 && Http.status == 200) {
          let response = JSON.parse(Http.responseText);
@@ -36,6 +37,9 @@ export default class App extends Component<Props> {
            result.push(result_json);
          }
          console.debug(result);
+         this.setState({
+           textValue: JSON.stringify(result)
+         });
        }
      };
    };
@@ -48,20 +52,57 @@ export default class App extends Component<Props> {
      Http.onreadystatechange = e => {
        if (Http.readyState == 4 && Http.status == 200) {
          let response = JSON.parse(Http.responseText);
-         json_response = {
+         result = {
            "time": response['routes'][0]['legs'][0]['duration']['value'],
            "distance": response['routes'][0]['legs'][0]['distance']['value'],
            "polyline": response['routes'][0]['overview_polyline']['points']
          };
-         console.log(json_response);
+         console.log(result);
+         this.setState({
+           textValue: JSON.stringify(result)
+         });
        }
      };
    };
 
+  yelp_search = (search_str, latitude, longitude) => {
+    const Http = new XMLHttpRequest();
+    url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(search_str) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude);
+    Http.open("GET", url);
+    Http.setRequestHeader('Authorization', 'Bearer ' + 'ngBHhApCaTwA0HfEvloYx0N57iWuE3TW1OkKRZ74PKbfDyZBThUWZHemHJ3LeltzP6NQ1dP3leLIepkqVxIkUX7R5xjNBo4vznjOZuOZVFMbgCWWEyxrZHuNNujUW3Yx');
+    Http.send();
+    Http.onreadystatechange = (e) => {
+      if (Http.readyState == 4 && Http.status == 200) {
+        response = JSON.parse(Http.responseText)
+
+        var result = []
+        for (var i = 0; i < response['businesses'].length; i++) {
+          result_json = {
+            "name": response['businesses'][i]['name'],
+            "image_url": response['businesses'][i]['image_url'],
+            "is_closed": response['businesses'][i]['is_closed'],
+            "review_count": response['businesses'][i]['review_count'],
+            "categories": response['businesses'][i]['categories'],
+            "rating": response['businesses'][i]['rating'],
+            "coordinates": response['businesses'][i]['coordinates'],
+            "price": response['businesses'][i]['price'],
+            "location": response['businesses'][i]['location'],
+          }
+          result.push(result_json)
+        }
+        console.log(result);
+        this.setState({
+          textValue: JSON.stringify(result)
+        });
+      }
+    }
+  }
+
+   // Front End: Replace parameter to do different queries
    render() {
-     return [<Button title="Query Place" onPress={ () => this.places_search("Anime", 34.069819, -118.45316)} />,
-        <Button title="Query Route" onPress={() => this.route_search(1, 34.069819, -118.453163, 34.039046, -118.442303)} />]
-       ;
+     return [<Button title="Query Place" onPress={() => this.places_search("Anime", 34.069819, -118.45316)} />, <Button title="Query Route" onPress={() => this.route_search(1, 34.069819, -118.453163, 34.039046, -118.442303)} />, <Button title="Query Yelp" onPress={() => this.yelp_search("ramen", +34.06893, -118.445127)} />, <View>
+         <Text style={{ color: "red" }}>{this.state.textValue}</Text>
+       </View>];
    }
  }
 
