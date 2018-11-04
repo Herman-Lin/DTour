@@ -11,6 +11,8 @@ import {Platform, StyleSheet, Text, View, Button} from 'react-native';
 import{ StackNavigator } from 'react-navigation';
 import SearchPage from './SearchPage';
 
+import FetchLocation from './components/FetchLocation';
+
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
   android:
@@ -18,9 +20,10 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
- const App = StackNavigator({
-    Home: { screen: SearchPage },
- });
+ const App = StackNavigator(
+   {
+    Home: { screen: SearchPage }}, 
+ {headerMode: 'none'});
  export default App;
 
 const styles = StyleSheet.create({

@@ -11,11 +11,14 @@ import{
     Image,
 } from 'react-native';
 
+import FetchLocation from './components/FetchLocation';
+import UsersMap from './components/UsersMap';
+
 export default class SearchPage extends Component{
     constructor(props) {
       super(props);
       this.state = {
-        searchString: 'ramen',
+        //searchString: 'ramen',
         isLoading: false,
         textValue: 'JSON response will be shown'
       };
@@ -109,34 +112,62 @@ export default class SearchPage extends Component{
       this.setState({ isLoading: true });
     };
 
+    state = {
+      userLocation: null,
+    } 
+    getUserLocationHandler = () => {
+      navigator.geolocation.getCurrentPosition(position => {
+        this.setState({
+          userLocation: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.0622,
+            longitudeDelta: 0.0421,
 
-    static navigationOptions ={
-        title: 'Dtour',
-    };
+          }
+        });
+      }, err => console.log(err));
+    }
+
+
+    //static navigationOptions ={
+    //    title: 'Dtour',
+    //};
 
     render(){
+        this.getUserLocationHandler() //get user location at startup
         const spinner = this.state.isLoading ? <ActivityIndicator size='large'/> : null;
         //console.log('SearchPage.render');
         return (
+          <View>
+            
+            
+            <View>
+              <UsersMap userLocation={this.state.userLocation}/>
+            </View>
+
             <View style={styles.container}>
-                <Text style={styles.description}>
-                    Search for destinations!
-                </Text>
+                
                 <View style={styles.flowRight}>
                   <TextInput
                     style={styles.searchInput}
                     value={this.state.searchString}
                     onChange={this._onSearchTextChanged}
-                    placeholder='Search'/>
+                    placeholder='Where to?'/>
                   <Button
                     onPress={this._onSearchPressed}
                     color='#FF0800'
                     title='Go'
                   />
                   {spinner}
+
+                 
+      
                 </View>
                 <Text style={{ color: "red" }}>{this.state.textValue}</Text>
+
              </View>
+          </View>
         );
     }
 
@@ -144,15 +175,19 @@ export default class SearchPage extends Component{
 }
 const styles = StyleSheet.create({
       description: {
-        marginBottom: 20,
+        marginBottom: 5,
         fontSize: 18,
         textAlign: 'center',
         color: '#656565'
       },
       container: {
-        padding: 30,
+        padding:10,
         marginTop: 65,
-        alignItems: 'center'
+        marginLeft: 10,
+        marginRight: 10,
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 3,
       },
       flowRight: {
         flexDirection: 'row',
@@ -162,13 +197,21 @@ const styles = StyleSheet.create({
       searchInput: {
         height: 36,
         padding: 4,
+        marginTop: 10,
         marginRight: 5,
         flexGrow: 1,
         fontSize: 18,
         borderWidth: 1,
         borderColor: '#FF0800',
-        borderRadius: 8,
+        borderRadius: 3,
         color: '#FF0800',
+        backgroundColor: '#FFFFFF',
+       
       },
+      map: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center'
+      }
 
     });
