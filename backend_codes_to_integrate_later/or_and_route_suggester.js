@@ -5,9 +5,10 @@
  * 
  */
 class Stop {
-    constructor(lat, long) {
+    constructor(lat, long, name) {
         this.lat = lat
         this.long = long
+        this.name = name
     }
 
     /**
@@ -35,11 +36,15 @@ class Stop {
  * goes to A or B, then C or D, then E, then F or G or H,
  * hence the name OrAndRouteSuggester.
  * 
+ * Notice that the order could be mutated, so a route that
+ * goes to F or G or H first, then E, then A or B, then C or D
+ * is also a valid route.
+ * 
  * A suggestion is an Array of Array that look like this:
  * [
- * [A,C,E,F],
+ * [E,A,F,C],
  * [A,D,E,F],
- * [B,C,E,G],
+ * [D,E,F,A],
  * ...
  * ]
  * the top one is the most recommended one.
@@ -72,20 +77,52 @@ class Stop {
      * @returns {Array.Array.Stop} - each Array.Stop in this var is a possible route
      */
     _get_all_possible_routes(start_stop,or_and_stop_arr,end_stop) {
-        var possible_middle_routes = this._recursive_routes(or_and_stop_arr);
         var possible_complete_routes = [];
-        for (var i = 0; i < possible_middle_routes.length; i++) {
-            var possible_complete_route = possible_middle_routes[i];
-            possible_complete_route.unshift(start_stop)
-            possible_complete_route.push(end_stop)
+        var or_and_stop_arr_perms = this._recursive_permutations(or_and_stop_arr);
+        for (var i = 0; i < or_and_stop_arr_perms.length; i++) {
+            var or_and_stop_arr_perm = or_and_stop_arr_perms[i];
+            var possible_middle_routes = this._recursive_routes(or_and_stop_arr_perm);
+            
+            for (var j = 0; j < possible_middle_routes.length; j++) {
+                var possible_complete_route = possible_middle_routes[j];
+                possible_complete_route.unshift(start_stop)
+                possible_complete_route.push(end_stop)
 
-            possible_complete_routes.push(possible_complete_route)
+                possible_complete_routes.push(possible_complete_route)
+            }
         }
         return possible_complete_routes
     }
 
     /**
-     * Supposedly private helper function for _get_all_possible_routes.
+     * Recursive helper function for _get_all_possible_routes.
+     * Get all possible permutations of the argument.
+     * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [[C,D],[A,B],[E],[F,G,H]]
+     * is one possible permutation.
+     * 
+     */
+    _recursive_permutations(or_and_stop_arr) {
+        if (or_and_stop_arr.length == 0) {
+            return [[]];
+        }
+
+        var results = [];
+        for (var i = 0; i < or_and_stop_arr.length; i++) {
+            var head = or_and_stop_arr[i];
+            var sub_perms = this._recursive_permutations(or_and_stop_arr.slice(0,i).concat(or_and_stop_arr.slice(i+1)));
+            for (var j = 0; j < sub_perms.length; j++) {
+                var sub_perm = sub_perms[j];
+                results.push([head].concat(sub_perm));
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Recursive helper function for _get_all_possible_routes.
+     * Get all possible OR-AND route.
+     * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [A,C,E,G]
+     * is one possible OR-AND route.
      * 
      */
     _recursive_routes(or_and_stop_arr) {
@@ -167,16 +204,51 @@ class RandomOrAndRouteSuggester extends OrAndRouteSuggester {
 }
 
 
+// test of helper functions
+oars = new LatLongOrAndRouteSuggester();
+console.log(oars._get_all_possible_routes(-1,[[1,11,111],[2,22],[3,33]],-99));
+ 
+// test of public methods
 
-start = new Stop(34.0704,118.4442); // Ackerman Union
-or_1 = [new Stop(34.0728,118.4422)]; // Royce Hall
-or_2 = [new Stop(34.0696,118.4429), new Stop(34.0716,118.4422), new Stop(34.0750,118.4415)]; // Math Science, Powell Library, YRL
-end = new Stop(34.0704,118.4442); // Ackerman Union
+/**
+ * The scenario is the following:
+ * 
+ * Assume that I live at Hedrick.
+ * Today I need to do these three things:
+ * 1. Take a class at Royce Hall
+ * 2. Go to either Math Sci, Powell or YRL to print and scan stuff
+ * 3. Eat lunch at Yoshinoya or De Neve.
+ * And I want to go back to Hedrick.
+ * 
+ * I don't really care what is the order of the three things.
+ * I can take a class first, print stuff, then eat;
+ * or I can eat first, print stuff, then take a class.
+ * (just like you usually don't care too much which spot to go first
+ * for a detour)
+ * 
+ * The LatLongOrAndRouteSuggester will do a brute force search
+ * over distances calculated by latitude and longitude and 
+ * suggest you 5 best routes.
+ * 
+ * Of course lat & long shortest != actual travel shortest
+ * so we will need to pass these routes to Google Maps to see
+ * which one is really shortest in the real world.
+ * (We can't directly pass all possible routes to Google Maps
+ * since there might be thousands of them. It will consume our
+ * free usage quickly. So RouteSuggester is here to reduce
+ * search space.)
+ * 
+ * Change suggest()'s parameter from 5 to 10000 to see worst
+ * routes at the end of the array.
+ * 
+ */
+start = new Stop(34.0731,118.4521,"Hedrick"); // Hedrick
+or_1 = [new Stop(34.0728,118.4422,"Royce Hall")]; // Royce Hall
+or_2 = [new Stop(34.0696,118.4429,"Math Sci"), new Stop(34.0716,118.4422,"Powell"), new Stop(34.0750,118.4415,"YRL")]; // Math Science, Powell Library, YRL
+or_3 = [new Stop(34.0683, 118.4422,"Yoshinoya"), new Stop(34.0708, 118.4502,"De Neve")]; // Yoshinoya, De Neve Plaza
+end = new Stop(34.0731,118.4521,"Hedrick"); // Hedrick
 
 console.log("Lat Long Route Suggester:")
 oars = new LatLongOrAndRouteSuggester();
-console.log(oars.suggest(start, [or_1, or_2], end, 2));
+console.log(oars.suggest(start, [or_1, or_2, or_3], end, 10000));
 
-console.log("Random Route Suggester:")
-oars = new RandomOrAndRouteSuggester();
-console.log(oars.suggest(start, [or_1, or_2], end, 2));
