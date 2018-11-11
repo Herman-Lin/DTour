@@ -13,6 +13,7 @@ import{
 
 import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
+import LocationSuggestion from './components/LocationSuggestion';
 
 export default class SearchPage extends Component{
     constructor(props) {
@@ -20,7 +21,8 @@ export default class SearchPage extends Component{
       this.state = {
         //searchString: 'ramen',
         isLoading: false,
-        textValue: 'JSON response will be shown'
+        textValue: 'JSON response will be shown',
+        results: []
       };
     }
 
@@ -39,7 +41,8 @@ export default class SearchPage extends Component{
            }
            console.debug(result);
            this.setState({
-             textValue: JSON.stringify(result)
+             textValue: JSON.stringify(result),
+             results: result
            });
          }
        };
@@ -60,7 +63,8 @@ export default class SearchPage extends Component{
           };
           console.log(result);
           this.setState({
-            textValue: JSON.stringify(result)
+            textValue: JSON.stringify(result),
+            results: result
           });
         }
       };
@@ -94,7 +98,8 @@ export default class SearchPage extends Component{
           console.log(result);
           this.setState({
             isLoading: false,
-            textValue: JSON.stringify(result)
+            textValue: JSON.stringify(result),
+            results: result
           });
         }
       }
@@ -160,12 +165,11 @@ export default class SearchPage extends Component{
                     title='Go'
                   />
                   {spinner}
-
-                 
-      
                 </View>
-                <Text style={{ color: "red" }}>{this.state.textValue}</Text>
 
+                {this.state.results.map((suggestions, index) => {
+                   return <LocationSuggestion key={index} name={suggestions.name} rating={suggestions.rating}/>
+                })}
              </View>
           </View>
         );
