@@ -166,9 +166,13 @@ export default class SearchPage extends Component{
                   />
                   {spinner}
                 </View>
-
+                {/*<Text>{this.state.textValue}</Text>*/}
                 {this.state.results.map((suggestions, index) => {
-                   return <LocationSuggestion key={index} name={suggestions.name} rating={suggestions.rating}/>
+                   return <LocationSuggestion key={index} name={suggestions.name} rating={suggestions.rating}
+                        image_url={suggestions.image_url} categories={suggestions.categories} price={suggestions.price}
+                        display_address={suggestions.location.display_address[0]}
+                   />
+
                 })}
              </View>
           </View>
