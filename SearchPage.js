@@ -14,6 +14,7 @@ import{
 import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
 import LocationSuggestion from './components/LocationSuggestion';
+import LocationList from './components/LocationList';
 
 export default class SearchPage extends Component{
     constructor(props) {
@@ -167,13 +168,7 @@ export default class SearchPage extends Component{
                   {spinner}
                 </View>
                 {/*<Text>{this.state.textValue}</Text>*/}
-                {this.state.results.map((suggestions, index) => {
-                   return <LocationSuggestion key={index} name={suggestions.name} rating={suggestions.rating}
-                        image_url={suggestions.image_url} categories={suggestions.categories} price={suggestions.price}
-                        display_address={suggestions.location.display_address[0]}
-                   />
-
-                })}
+                <LocationList results={this.state.results}/>
              </View>
           </View>
         );
