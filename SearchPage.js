@@ -13,60 +13,49 @@ import{
 
 import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
+import {StopStorage} from './StopStorage';
 import LocationSuggestion from './components/LocationSuggestion';
+
 import LocationList from './components/LocationList';
 
 export default class SearchPage extends Component{
     constructor(props) {
       super(props);
+      this.stopStorage = new StopStorage(); 
+      this.getUserLocationHandler(); //get user location at startup
+      this.stopStorage.setStart(34.069872, -118.453163);
+      this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}");
+      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"]);
+      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]);
       this.state = {
-        //searchString: 'ramen',
         isLoading: false,
         textValue: 'JSON response will be shown',
-        results: []
+        results: [],
+        addressSuggestions: [],
+        userLocation: null,
+        routeSuggestions: this.stopStorage.getSuggestion(),
       };
     }
 
-    places_search = (search_str, latitude, longitude) => {
-       const Http = new XMLHttpRequest();
-       url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + String(latitude) + "," + String(longitude) + "&radius=40000" + "&keyword=" + encodeURIComponent(search_str) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M";
-       Http.open("GET", url);
-       Http.send();
-       Http.onreadystatechange = e => {
-         if (Http.readyState == 4 && Http.status == 200) {
-           let response = JSON.parse(Http.responseText);
-           var result = [];
-           for (var i = 0; i < response["results"].length; i++) {
-             result_json = { name: response["results"][i]["name"], ratings: response["results"][i]["ratings"], types: response["results"][i]["types"], location: response["results"][i]["geometry"]["location"] };
-             result.push(result_json);
-           }
-           console.debug(result);
-           this.setState({
-             textValue: JSON.stringify(result),
-             results: result
-           });
-         }
-       };
-     };
-
-    route_search = (mode, start_latitude, start_longitude, end_latitude, end_longitude) => {
+    /**
+     * Given an address, change addressSuggestion in state to corresponding array of {address, ID}
+     * @param {string} address Incomplete search terms
+     */
+    address_search = (address) => {
       const Http = new XMLHttpRequest();
-      var url = "https://maps.googleapis.com/maps/api/directions/json?origin=" + String(start_latitude) + "," + String(start_longitude) + "&destination=" + String(end_latitude) + "," + String(end_longitude) + "&key=AIzaSyDH6H2IlW_LHCmfh0CV0-aS9aR19XMsn94";
+      var url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + encodeURIComponent(address) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M&location=" + String(this.state.latitude) + "," + String(this.state.longitude);
       Http.open("GET", url);
       Http.send();
       Http.onreadystatechange = e => {
         if (Http.readyState == 4 && Http.status == 200) {
           let response = JSON.parse(Http.responseText);
-          let result = {
-            "time": response['routes'][0]['legs'][0]['duration']['value'],
-            "distance": response['routes'][0]['legs'][0]['distance']['value'],
-            "polyline": response['routes'][0]['overview_polyline']['points']
-          };
-          console.log(result);
-          this.setState({
-            textValue: JSON.stringify(result),
-            results: result
+          var suggestions = [];
+          response["predictions"].forEach(function (prediction) {
+            result.push({"Address": prediction['description'], "ID": prediction['place_id']});
           });
+          this.setState(
+            {addressSuggestions: suggestions}
+          );
         }
       };
     };
@@ -81,22 +70,23 @@ export default class SearchPage extends Component{
         if (Http.readyState == 4 && Http.status == 200) {
           var response = JSON.parse(Http.responseText)
 
-          var result = []
-          for (var i = 0; i < response['businesses'].length; i++) {
+          var result = [];
+          
+          response['businesses'].forEach(function (business) {
             var result_json = {
-              "name": response['businesses'][i]['name'],
-              "image_url": response['businesses'][i]['image_url'],
-              "is_closed": response['businesses'][i]['is_closed'],
-              "review_count": response['businesses'][i]['review_count'],
-              "categories": response['businesses'][i]['categories'],
-              "rating": response['businesses'][i]['rating'],
-              "coordinates": response['businesses'][i]['coordinates'],
-              "price": response['businesses'][i]['price'],
-              "location": response['businesses'][i]['location'],
+              "name": business['name'],
+              "image_url": business['image_url'],
+              "is_closed": business['is_closed'],
+              "review_count": business['review_count'],
+              "categories": business['categories'],
+              "rating": business['rating'],
+              "coordinates": business['coordinates'],
+              "price": business['price'],
+              "location": business['location'],
             }
             result.push(result_json)
-          }
-          console.log(result);
+          });
+
           this.setState({
             isLoading: false,
             textValue: JSON.stringify(result),
@@ -114,13 +104,12 @@ export default class SearchPage extends Component{
 
 
     _onSearchPressed = () => {
+      if (this.state.searchString === undefined || this.state.searchString == "") return;
       this.yelp_search(this.state.searchString, +34.06893, -118.445127);
       this.setState({ isLoading: true });
+      console.log(this.state.routeSuggestions);
     };
 
-    state = {
-      userLocation: null,
-    } 
     getUserLocationHandler = () => {
       navigator.geolocation.getCurrentPosition(position => {
         this.setState({
@@ -129,7 +118,6 @@ export default class SearchPage extends Component{
             longitude: position.coords.longitude,
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
-
           }
         });
       }, err => console.log(err));
@@ -141,13 +129,10 @@ export default class SearchPage extends Component{
     //};
 
     render(){
-        this.getUserLocationHandler() //get user location at startup
         const spinner = this.state.isLoading ? <ActivityIndicator size='large'/> : null;
         //console.log('SearchPage.render');
         return (
           <View>
-            
-            
             <View>
               <UsersMap userLocation={this.state.userLocation}/>
             </View>
