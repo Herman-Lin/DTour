@@ -9,6 +9,7 @@ import{
     Button,
     ActivityIndicator,
     Image,
+    TouchableOpacity,
 } from 'react-native';
 
 import FetchLocation from './components/FetchLocation';
@@ -102,7 +103,6 @@ export default class SearchPage extends Component{
       //console.log('Current: '+this.state.searchString+', Next: '+event.nativeEvent.text);
     };
 
-
     _onSearchPressed = () => {
       if (this.state.searchString === undefined || this.state.searchString == "") return;
       this.yelp_search(this.state.searchString, +34.06893, -118.445127);
@@ -135,26 +135,19 @@ export default class SearchPage extends Component{
           <View>
             <View>
               <UsersMap userLocation={this.state.userLocation}/>
+            </View>        
+            <View style={styles.flowRight}>
+              <TextInput
+                style={styles.searchInput}
+                value={this.state.searchString}
+                onSubmitEditing={this._onSearchPressed}
+                onChange={this._onSearchTextChanged}
+                placeholder='Where to?'/>
             </View>
-
             <View style={styles.container}>
-                
-                <View style={styles.flowRight}>
-                  <TextInput
-                    style={styles.searchInput}
-                    value={this.state.searchString}
-                    onChange={this._onSearchTextChanged}
-                    placeholder='Where to?'/>
-                  <Button
-                    onPress={this._onSearchPressed}
-                    color='#FF0800'
-                    title='Go'
-                  />
-                  {spinner}
-                </View>
                 {/*<Text>{this.state.textValue}</Text>*/}
                 <LocationList results={this.state.results}/>
-             </View>
+            </View>  
           </View>
         );
     }
@@ -169,32 +162,34 @@ const styles = StyleSheet.create({
         color: '#656565'
       },
       container: {
-        padding:10,
-        marginTop: 65,
-        marginLeft: 10,
-        marginRight: 10,
+        marginTop: -18,
+        marginLeft: 20,
+        marginRight: 20,
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 3,
+        backgroundColor: 'white',
+        borderRadius: 6
       },
       flowRight: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'stretch',
+        zIndex: 100
       },
       searchInput: {
-        height: 36,
-        padding: 4,
-        marginTop: 10,
-        marginRight: 5,
+        height: 50,
+        padding: 10,
+        marginTop: 80,
+        marginLeft: 20,
+        marginRight: 20,
         flexGrow: 1,
-        fontSize: 18,
-        borderWidth: 1,
-        borderColor: '#FF0800',
-        borderRadius: 3,
-        color: '#FF0800',
-        backgroundColor: '#FFFFFF',
-       
+        fontSize: 17,
+        color: 'black',
+        backgroundColor: 'white',
+        borderRadius: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2
       },
       map: {
         width: '100%',
