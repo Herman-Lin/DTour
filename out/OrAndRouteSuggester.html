@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: OrAndRouteSuggester</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: OrAndRouteSuggester</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>OrAndRouteSuggester<span class="signature">(strategy)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">This class uses a Strategy pattern.OrAndRouteSuggester is a class that can suggest routesbased on list of stops in OR-AND format users want to visit.e.g. [[A,B],[C,D],[E],[F,G,H]]will generate good route candidates (suggests) thatgoes to A or B, then C or D, then E, then F or G or H,hence the name OrAndRouteSuggester.Notice that the order could be mutated, so a route thatgoes to F or G or H first, then E, then A or B, then C or Dis also a valid route.A suggestion is an Array of Array that look like this:[[E,A,F,C],[A,D,E,F],[D,E,F,A],...]the top one is the most recommended one.Different subclasses have different algorithmsfor suggesting posible routes.Using ES6 class sugar syntax.</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="OrAndRouteSuggester"><span class="type-signature"></span>new OrAndRouteSuggester<span class="signature">(strategy)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>strategy</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="StopStorage.js.html">StopStorage.js</a>, <a href="StopStorage.js.html#line65">line 65</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_get_all_possible_routes"><span class="type-signature"></span>_get_all_possible_routes<span class="signature">(start_stop, or_and_stop_arr, end_stop)</span><span class="type-signature"> &rarr; {Array.Array.Stop}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>start_stop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Stop.html">Stop</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">starting Stop</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>or_and_stop_arr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.Array.Stop</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an Array of Array of stops. See documentation of OrAndRouteSuggester for an example</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>end_stop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Stop.html">Stop</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ending Stop</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="StopStorage.js.html">StopStorage.js</a>, <a href="StopStorage.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - each Array.Stop in this var is a possible route
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.Array.Stop</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_recursive_permutations"><span class="type-signature"></span>_recursive_permutations<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Recursive helper function for _get_all_possible_routes.Get all possible permutations of the argument.e.g. [[A,B],[C,D],[E],[F,G,H]] --> [[C,D],[A,B],[E],[F,G,H]]is one possible permutation.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="StopStorage.js.html">StopStorage.js</a>, <a href="StopStorage.js.html#line110">line 110</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_recursive_routes"><span class="type-signature"></span>_recursive_routes<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Recursive helper function for _get_all_possible_routes.Get all possible OR-AND route.e.g. [[A,B],[C,D],[E],[F,G,H]] --> [A,C,E,G]is one possible OR-AND route.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="StopStorage.js.html">StopStorage.js</a>, <a href="StopStorage.js.html#line134">line 134</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="suggest"><span class="type-signature"></span>suggest<span class="signature">(start_stop, or_and_stop_arr, end_stop, max_num)</span><span class="type-signature"> &rarr; {Array.Array.Stop}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>start_stop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Stop.html">Stop</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">starting Stop</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>or_and_stop_arr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.Array.Stop</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an Array of Array of stops. e.g. [[A,B],[C,D],[E],[F,G,H]]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>end_stop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Stop.html">Stop</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ending Stop</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max_num</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">maximum number of routes to suggest</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="StopStorage.js.html">StopStorage.js</a>, <a href="StopStorage.js.html#line74">line 74</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - each Array.Stop in this var is a SUGGESTED route
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.Array.Stop</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LatLongOrAndRouteSuggester.html">LatLongOrAndRouteSuggester</a></li><li><a href="OrAndRouteSuggester.html">OrAndRouteSuggester</a></li><li><a href="RandomOrAndRouteSuggester.html">RandomOrAndRouteSuggester</a></li><li><a href="Stop.html">Stop</a></li><li><a href="StopStorage.html">StopStorage</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Nov 14 2018 20:13:50 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
