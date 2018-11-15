@@ -54,4 +54,33 @@ export class StopSuggestion	{
 		}
 		return locations;
 	}
+
+/*
+	
+// needs RouteBoxer to run
+var directionService = new google.maps.DirectionsService();
+var rboxer = new RouteBoxer();
+var distance = 15*1.6; // in miles 
+var stopArray = [];
+var yelp = new AddStopPage();
+
+
+	directionService.route(request, function(result, status) {
+	  if (status == google.maps.DirectionsStatus.OK) {
+
+		var path = result.routes[0].overview_path;
+		var boxes = routeBoxer.box(path, distance);
+
+		for (var i = 0; i < boxes.length; i++) {
+		  var bounds = box[i];
+		  var stop = bounds.getCenter();
+		  yelp.yelp_search("gas", stop.lat(), stop.long());
+		  stopArray.push(yelp.state.results);
+		}
+	  }
+	});
+
+*/
+	
+
 }
