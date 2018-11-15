@@ -33,7 +33,7 @@ export class StopSuggestion	{
 	};
 	
   /**
-   * Finding stops along route
+   * Finding stops along route 
    * @param {float} origLat origin's Latitude of route
    * @param {float} origLong origin's Longitude of route
    * @param {float} destLat destination's Latitude of route
@@ -63,7 +63,7 @@ var rboxer = new RouteBoxer();
 var distance = 15*1.6; // in miles 
 var stopArray = [];
 var yelp = new AddStopPage();
-
+var type = "gas";
 
 	directionService.route(request, function(result, status) {
 	  if (status == google.maps.DirectionsStatus.OK) {
@@ -74,13 +74,16 @@ var yelp = new AddStopPage();
 		for (var i = 0; i < boxes.length; i++) {
 		  var bounds = box[i];
 		  var stop = bounds.getCenter();
-		  yelp.yelp_search("gas", stop.lat(), stop.long());
+		  yelp.yelp_search(type, stop.lat(), stop.long());
 		  stopArray.push(yelp.state.results);
 		}
 	  }
 	});
+	
+console.log(stopArray);
 
 */
+	
 	
 
 }
