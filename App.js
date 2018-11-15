@@ -6,11 +6,11 @@
  * @flow
  */
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button} from 'react-native';
-import{ StackNavigator } from 'react-navigation';
+import React, { Component } from 'react';
+import { Platform, StyleSheet, Text, View, Button } from 'react-native';
+import{ createStackNavigator } from 'react-navigation';
 import SearchPage from './SearchPage';
-
+import AddStopPage from './AddStopPage';
 import FetchLocation from './components/FetchLocation';
 
 const instructions = Platform.select({
@@ -20,19 +20,35 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
- const App = StackNavigator(
-   {
-    Home: { screen: SearchPage }}, 
- {headerMode: 'none'});
- export default App;
+const App = createStackNavigator(
+  {
+    Home: {
+      screen: SearchPage,
+      navigationOptions: () => ({
+        header: null
+      }),
+    },
+    AddStop: {
+      screen: AddStopPage,
+      navigationOptions: () => ({
+        title: `Route Planning`,
+      })
+    }
+  },
+  {
+    initialRouteName: 'Home'
+  }
+);
+
+export default App;
 
 const styles = StyleSheet.create({
-  description:{
+  description: {
     fontSize: 18,
     textAlign: 'center',
     color: '#555555',
     marginTop: 65,
-    },
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
