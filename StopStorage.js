@@ -242,7 +242,9 @@ class RandomOrAndRouteSuggester extends OrAndRouteSuggester {
  * routes at the end of the array.
  * 
  */
-
+/**
+ * StopStorage is a class that holds the stops, the starting point and the destination
+ */
 export class StopStorage {
     constructor() {
         this._stops = [];
