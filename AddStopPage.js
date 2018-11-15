@@ -6,10 +6,10 @@ import{
     Text,
     TextInput,
     View,
-    Button,
     ActivityIndicator,
     Image,
     TouchableOpacity,
+    Button
 } from 'react-native';
 
 import FetchLocation from './components/FetchLocation';
@@ -151,7 +151,7 @@ export default class AddStopPage extends Component{
     render(){
         const spinner = this.state.isLoading ? <ActivityIndicator size='large'/> : null;
         return (
-          <View>                 
+          <View style={{flex: 1}}>
             <View style={styles.planningBoard}>
               <TextInput
                 style={styles.searchInput}
@@ -175,7 +175,8 @@ export default class AddStopPage extends Component{
             <View style={styles.container}>
                 {/*<Text>{this.state.textValue}</Text>*/}
                 <LocationList results={this.state.results}/>
-            </View>  
+            </View>
+            <Button title="Generate Route" style={styles.generateButton} color='#FF0000'/>
           </View>
         );
     }
@@ -195,7 +196,11 @@ const styles = StyleSheet.create({
         marginRight: 20,
         alignItems: 'center',
         backgroundColor: 'white',
-        borderRadius: 6
+        borderRadius: 6,
+        flex: 5,
+      },
+      generateButton:{
+        flex: 1,
       },
       flowRight: {
         flexDirection: 'row',
@@ -213,7 +218,8 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: { width: 2, height: 5 },
         shadowOpacity: 0.2,
-        shadowRadius: 2
+        shadowRadius: 2,
+        flex: 3,
       },
       searchInput: {
         padding: 15,

@@ -7,7 +7,7 @@ class LocationSuggestion extends React.Component {
             <View style={styles.resultRow}>
                 <Image source={{uri: this.props.image_url}}
                     style={{width: 80, height: 80, margin: 10, justifyContent:'flex-start'}}/>
-                <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+                <View style={{flexDirection: 'column', justifyContent: 'center', width: 200}}>
                     <Text style={{fontWeight: 'bold'}}>{this.props.name}</Text>
                     <Text>{this.props.rating}</Text>
                     <Text>{this.props.categories[0].title}</Text>
@@ -30,6 +30,5 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#555555',
   }
-
 });
 export default LocationSuggestion
