@@ -4,10 +4,15 @@ import React from 'react';
 import AddStopPage from './AddStopPage'
 import { StopStorage } from './StopStorage'
 
-// given route from A to B, find stops for given stop type
 
 export class StopSuggestion	{
 	
+  /**
+   * Using Google Direction API to find route data
+   * @param {string} orig origin of route
+   * @param {string} dest destination of route
+   * @param {string} type type of stop user wants to visit
+   */
 	route_search = (orig, dest, type) => {
 		const Http = new XMLHttpRequest();
 		var MapKey = "AIzaSyDH6H2IlW_LHCmfh0CV0-aS9aR19XMsn94";
@@ -27,7 +32,14 @@ export class StopSuggestion	{
 		return stops;
 	};
 	
-	// simple implementation 
+  /**
+   * Finding stops along route
+   * @param {float} origLat origin's Latitude of route
+   * @param {float} origLong origin's Longitude of route
+   * @param {float} destLat destination's Latitude of route
+   * @param {float} destLong destinations's Longitude of route
+   * @param {string} type type of stop user wants to visit
+   */
 	basic_stop_search = (origLat, origLong, destLat, destLong, type) => {
 		var latDiff = destLat - origLat;
 		var longDiff = destLong - origLong;
