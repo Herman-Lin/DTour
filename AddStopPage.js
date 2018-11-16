@@ -23,11 +23,11 @@ export default class AddStopPage extends Component{
     constructor(props) {
       super(props);
       this.stopStorage = new StopStorage(); 
-      this.getUserLocationHandler(); //get user location at startup
       this.stopStorage.setStart(34.069872, -118.453163);
       this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}");
       this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"]);
       this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]);
+      this.getUserLocationHandler(); //get user location
       this.state = {
         isLoading: false,
         textValue: 'JSON response will be shown',
@@ -37,7 +37,8 @@ export default class AddStopPage extends Component{
         routeSuggestions: this.stopStorage.getSuggestion(),
         searchString1: "",
         searchString2: "",
-        searchString3: ""
+        searchString3: "",
+        suggestions: this.stopStorage.getSuggestion()
       };
     }
 
@@ -176,7 +177,7 @@ export default class AddStopPage extends Component{
                 {/*<Text>{this.state.textValue}</Text>*/}
                 <LocationList results={this.state.results}/>
             </View>
-            <Button title="Generate Route" style={styles.generateButton} color='#FF0000'/>
+            <Button onPress={() => {console.log(this.state.suggestions);}} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
           </View>
         );
     }
