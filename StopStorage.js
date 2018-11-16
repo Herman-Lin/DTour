@@ -317,3 +317,5 @@ export class StopStorage {
     return results;
   }
 }
+
+module.exports = {Stop, OrAndRouteSuggester, LatLongOrAndRouteSuggester}
