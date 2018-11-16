@@ -3,6 +3,10 @@
  * Construct with a Yelp Fusion API object with 1 argument, or using lat and long with 2 arguments 
  */
 class Stop {
+    /**
+     * @param {String} lat Latitude of the Stop, or Yelp Fusion API json string
+     * @param {Number} long Longitude of the stop, or undefined if using Yelp Fusion API
+     */
     constructor(lat, long) {
         if (long === undefined) {
             this.latitude = JSON.parse(lat).coordinates.latitude;
@@ -14,19 +18,19 @@ class Stop {
         }
     }
 
-    getLatitude() {return this._lat;}
-    getLongitude() {return this._long}
+    getLatitude() {return this.latitude;}
+    getLongitude() {return this.longitude;}
 
     /**
      * Calculate distance with `anotherStop` based on lat and long.
      * 
-     * @param {Stop} anotherStop 
+     * @param {Stop} anotherStop Another Stop
      * @returns {Number} Euclidean distance of lat and long
      */
     lat_long_distance(anotherStop) {
         return Math.sqrt(
-            Math.pow(this._lat - anotherStop.getLatitude(), 2) +
-            Math.pow(this._long - anotherStop.getLongitude(), 2)
+            Math.pow(this.latitude - anotherStop.getLatitude(), 2) +
+            Math.pow(this.longitude - anotherStop.getLongitude(), 2)
         );
     }
 }
@@ -59,109 +63,127 @@ class Stop {
  * for suggesting posible routes.
  * 
  * Using ES6 class sugar syntax.
- * 
- * @param {} strategy
  */
 class OrAndRouteSuggester {
-    /**
-     * @param  {Stop} start_stop - starting Stop
-     * @param  {Array.Array.Stop} or_and_stop_arr - an Array of Array of stops. e.g. [[A,B],[C,D],[E],[F,G,H]]
-     * @param  {Stop} end_stop - ending Stop
-     * @param  {Number} max_num - maximum number of routes to suggest
-     * 
-     * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
-     */
-    suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
-        throw "OrAndRouteSuggester.suggest() is an abstract method. Call OrAndRouteSuggester's concrete subclass' suggest() instead."
+  /**
+   * Abstract method that suggests routes - to be implemented by subclasses
+   * Different subclasses will have different strategies to provide route suggestion
+   *
+   * @param {Stop} start_stop user pre-selected start of route
+   * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+   * @param {Stop} end_stop user pre-selected destination
+   * @param {Number} max_num the number of route candidates to be returned
+   *
+   * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
+   */
+  suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
+    throw "OrAndRouteSuggester.suggest() is an abstract method. Call OrAndRouteSuggester's concrete subclass' suggest() instead.";
+  }
+
+  /**
+   * Private method that generates all possible routes.
+   *
+   * @param  {Stop} start_stop - starting Stop
+   * @param  {Array.Array.Stop} or_and_stop_arr - an Array of Array of stops. See documentation of class for example
+   * @param  {Stop} end_stop - ending Stop
+   *
+   * @returns {Array.Array.Stop} - each Array.Stop in this var is a possible route
+   */
+  _get_all_possible_routes(start_stop, or_and_stop_arr, end_stop) {
+    var possible_complete_routes = [];
+    var or_and_stop_arr_perms = this._recursive_permutations(or_and_stop_arr);
+    for (var i = 0; i < or_and_stop_arr_perms.length; i++) {
+      var or_and_stop_arr_perm = or_and_stop_arr_perms[i];
+      var possible_middle_routes = this._recursive_routes(or_and_stop_arr_perm);
+
+      for (var j = 0; j < possible_middle_routes.length; j++) {
+        var possible_complete_route = possible_middle_routes[j];
+        possible_complete_route.unshift(start_stop);
+        possible_complete_route.push(end_stop);
+        possible_complete_routes.push(possible_complete_route);
+      }
+    }
+    return possible_complete_routes;
+  }
+
+  /**
+   * Private helper method for _get_all_possible_routes.
+   * Get all possible permutations of the argument.
+   * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [[C,D],[A,B],[E],[F,G,H]]
+   * is one possible permutation.
+   *
+   * @param {Array.Array.Stop} or_and_stop_arr an Array of Array of stops.
+   * 
+   * @returns {Array.Array.Stop} all permutations of Or/And Stop arrays
+   */
+  _recursive_permutations(or_and_stop_arr) {
+    if (or_and_stop_arr.length == 0) {
+      return [[]];
     }
 
-    /**
-     * @param  {Stop} start_stop - starting Stop
-     * @param  {Array.Array.Stop} or_and_stop_arr - an Array of Array of stops. See documentation of OrAndRouteSuggester for an example
-     * @param  {Stop} end_stop - ending Stop
-     * 
-     * @returns {Array.Array.Stop} - each Array.Stop in this var is a possible route
-     */
-    _get_all_possible_routes(start_stop, or_and_stop_arr, end_stop) {
-        var possible_complete_routes = [];
-        var or_and_stop_arr_perms = this._recursive_permutations(or_and_stop_arr);
-        for (var i = 0; i < or_and_stop_arr_perms.length; i++) {
-            var or_and_stop_arr_perm = or_and_stop_arr_perms[i];
-            var possible_middle_routes = this._recursive_routes(or_and_stop_arr_perm);
+    var results = [];
+    for (var i = 0; i < or_and_stop_arr.length; i++) {
+      var head = or_and_stop_arr[i];
+      var sub_perms = this._recursive_permutations(
+        or_and_stop_arr.slice(0, i).concat(or_and_stop_arr.slice(i + 1))
+      );
+      for (var j = 0; j < sub_perms.length; j++) {
+        var sub_perm = sub_perms[j];
+        results.push([head].concat(sub_perm));
+      }
+    }
+    return results;
+  }
 
-            for (var j = 0; j < possible_middle_routes.length; j++) {
-                var possible_complete_route = possible_middle_routes[j];
-                possible_complete_route.unshift(start_stop)
-                possible_complete_route.push(end_stop)
-
-                possible_complete_routes.push(possible_complete_route)
-            }
-        }
-        return possible_complete_routes
+  /**
+   * Recursive helper function for _get_all_possible_routes.
+   * Get all possible OR-AND route.
+   * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [A,C,E,G]
+   * is one possible OR-AND route.
+   *
+   * @param {Array.Array.Stop} or_and_stop_arr an Array of Array of stops.
+   *
+   * @returns {Array.Array.Stop} get possible middle routes
+   */
+  _recursive_routes(or_and_stop_arr) {
+    if (or_and_stop_arr.length == 0) {
+      return [[]];
     }
 
-    /**
-     * Recursive helper function for _get_all_possible_routes.
-     * Get all possible permutations of the argument.
-     * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [[C,D],[A,B],[E],[F,G,H]]
-     * is one possible permutation.
-     * 
-     */
-    _recursive_permutations(or_and_stop_arr) {
-        if (or_and_stop_arr.length == 0) {
-            return [[]];
-        }
+    var results = [];
+    var first_or_list = or_and_stop_arr[0];
+    for (var i = 0; i < first_or_list.length; i++) {
+      var each_or_stop = first_or_list[i];
+      var sub_routes = this._recursive_routes(or_and_stop_arr.slice(1));
 
-        var results = [];
-        for (var i = 0; i < or_and_stop_arr.length; i++) {
-            var head = or_and_stop_arr[i];
-            var sub_perms = this._recursive_permutations(or_and_stop_arr.slice(0, i).concat(or_and_stop_arr.slice(i + 1)));
-            for (var j = 0; j < sub_perms.length; j++) {
-                var sub_perm = sub_perms[j];
-                results.push([head].concat(sub_perm));
-            }
-        }
-        return results;
+      for (var j = 0; j < sub_routes.length; j++) {
+        var sub_route = sub_routes[j];
+        results.push([each_or_stop].concat(sub_route));
+      }
     }
 
-    /**
-     * Recursive helper function for _get_all_possible_routes.
-     * Get all possible OR-AND route.
-     * e.g. [[A,B],[C,D],[E],[F,G,H]] --> [A,C,E,G]
-     * is one possible OR-AND route.
-     * 
-     */
-    _recursive_routes(or_and_stop_arr) {
-        if (or_and_stop_arr.length == 0) {
-            return [[]];
-        }
-
-        var results = [];
-        var first_or_list = or_and_stop_arr[0];
-        for (var i = 0; i < first_or_list.length; i++) {
-            var each_or_stop = first_or_list[i];
-            var sub_routes = this._recursive_routes(or_and_stop_arr.slice(1));
-
-            for (var j = 0; j < sub_routes.length; j++) {
-                var sub_route = sub_routes[j];
-                results.push([each_or_stop].concat(sub_route));
-            }
-        }
-
-        return results;
-    }
+    return results;
+  }
 }
 
 /**
-  * LatLongOrAndRouteSuggester is an implementation of the abstract
-  * strategy OrAndRouteSuggester.
-  * 
-  * suggest() calculates lat long distances between 
-  * all stops for each possible route, and return
-  * top `max_num` number of routes to suggest.
-  * 
-  */
+ * LatLongOrAndRouteSuggester is an implementation of the abstract
+ * strategy OrAndRouteSuggester.
+ */
 class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
+    /**
+     * Public method suggest() calculates Euclidean distance among an array of
+     * latitude and longitude coordinates. This method utilizes a crude brute
+     * force approach by iterating through ALL possible routes, and returns
+     * `max_num` number of routes to suggest.
+     *
+     * @param {Stop} start_stop user pre-selected start of route 
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category 
+     * @param {Stop} end_stop user pre-selected destination 
+     * @param {Number} max_num the number of route candidates to be returned
+     * 
+     * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
+     */
     suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
         var all_possible_routes = super._get_all_possible_routes(start_stop, or_and_stop_arr, end_stop);
 
@@ -186,9 +208,9 @@ class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
     }
 
     /**
-     * 
-     * @param {Array.Stop} route
-     * @returns {Number} 
+     * Private method Iterating through an array of Stop object and return the sum of distances
+     * @param {Array.Stop} route a given route constructed through an array of Stops
+     * @returns {Number} Euclidean distance of the route 
      */
     _calculate_length_of_route(route) {
         var total_len = 0;
@@ -200,61 +222,22 @@ class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
 }
 
 /**
- * Joke strategy, not worth it to implement it.
+ * StopStorage is class that facilitates the UI to retrieve current information about the postential
+ * stops and the current optimal route. It implements a façade design pattern that achieves both
+ * information hiding and data storage of route and stop information
  */
-class RandomOrAndRouteSuggester extends OrAndRouteSuggester {
-    suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
-        throw "not implemented yet."
-    }
-}
-
-// test of public methods
-
-/**
- * The scenario is the following:
- * 
- * Assume that I live at Hedrick.
- * Today I need to do these three things:
- * 1. Take a class at Royce Hall
- * 2. Go to either Math Sci, Powell or YRL to print and scan stuff
- * 3. Eat lunch at Yoshinoya or De Neve.
- * And I want to go back to Hedrick.
- * 
- * I don't really care what is the order of the three things.
- * I can take a class first, print stuff, then eat;
- * or I can eat first, print stuff, then take a class.
- * (just like you usually don't care too much which spot to go first
- * for a detour)
- * 
- * The LatLongOrAndRouteSuggester will do a brute force search
- * over distances calculated by latitude and longitude and 
- * suggest you 5 best routes.
- * 
- * Of course lat & long shortest != actual travel shortest
- * so we will need to pass these routes to Google Maps to see
- * which one is really shortest in the real world.
- * (We can't directly pass all possible routes to Google Maps
- * since there might be thousands of them. It will consume our
- * free usage quickly. So RouteSuggester is here to reduce
- * search space.)
- * 
- * Change suggest()'s parameter from 5 to 10000 to see worst
- * routes at the end of the array.
- * 
- */
-
 export class StopStorage {
     constructor() {
-        this._stops = [];
-        this._start = null;
-        this._destination = null;
-        this.suggester = new LatLongOrAndRouteSuggester();
+        this._stops = []; // {Array.Array.Stop} potential candidates of waypoint
+        this._start = null; // {Stop} User's route start point 
+        this._destination = null;  // {Stop} User's destination
+        this.suggester = new LatLongOrAndRouteSuggester(); // Route Suggest Handler
     }
   /**
-   *
-   * @param {string} lat JSON String of Yelp Fusion API
-   * @param {float} lat current latitude of user's location
-   * @param {float} long current latitude of user's location
+   * Public setter of user's start location
+   * 
+   * @param {String} lat JSON String of Yelp Fusion API, or the current latitude of user's location
+   * @param {Number} long current latitude of user's location
    */
     setStart(lat, long) {
         if (long === undefined) {
@@ -265,11 +248,18 @@ export class StopStorage {
   }
   /**
    * Using an Yelp API Return JSON as destination.
-   * @param {string} json
+   * 
+   * @param {string} json Yelp API json
    */
     setDestination(json) {
         this._destination = new Stop(json);
     }
+    /**
+     * Add a specific stop using a single Yelp Fusion API json string, or
+     * an array of candidate Yelp Fusion API string as stops
+     * 
+     * @param {String} listOfJson String or Array of string which user selected as desired stops
+     */
     addStop(listOfJson) {
         if (listOfJson.constructor === Array) {
             var list = [];
@@ -283,10 +273,13 @@ export class StopStorage {
         }
   }
   /**
-   * returns 10 route suggestions in the format of Array of {viewport: {northeast: {lat, long}, southwest: {lat, long}},
-   *                                                         coordinates: array, 
-   *                                                         polyline: string, 
-   *                                                         time: string}
+   * Public method that retrieves the current optimal stops along with the necessary json to construct a map view
+   *  
+   * @returns {Array.String} return 10 route suggestions in the format of Array 
+   *                         of {viewport: {northeast: {lat, long}, southwest: {lat, long}},
+   *                             coordinates: array, 
+   *                             polyline: string, 
+   *                             time: string}
    */
   getSuggestion() {
     if (this._start == null)
@@ -324,3 +317,5 @@ export class StopStorage {
     return results;
   }
 }
+
+module.exports = {Stop, OrAndRouteSuggester, LatLongOrAndRouteSuggester}
