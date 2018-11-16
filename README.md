@@ -38,3 +38,12 @@ input: (0,0), { [(1,0), (1,1)], [(2,0)] }, (2,2) --> expected output: (0,0),(1,0
                                                                       (0,0),(2,0),(1,1),(2,2); 
                                                                       (0,0),(2,0),(1,0),(2,2)  // farthest to go to 4 places
 ```
+## Testing scenario 4. StopStorage
+Test whether suggest() of LatLongOrAndRouteSuggester suggests routes sorted by shortest distances (calculated by latitude and longitude on.ly)
+
+```
+input: calls setStart with coordinate. --> expected output: private start coordinate updated
+input: calls setDestination with JSON. --> expected output: private end coordinate updated
+input: calls addStop with coordinate. --> expected output: private stop coordinate added
+input: calls addStop with JSON. --> expected output: private stop coordinate added
+```
