@@ -105,6 +105,8 @@ export default class SearchPage extends Component{
     //   console.log(this.state.routeSuggestions);
     // };
 
+
+
     getUserLocationHandler = () => {
       navigator.geolocation.getCurrentPosition(position => {
         this.setState({
@@ -113,16 +115,25 @@ export default class SearchPage extends Component{
             longitude: position.coords.longitude,
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
+          },
+
+          userDestination: {
+            latitude: 35.0000,
+            longitude: -119.000,
+            latitudeDelta: 0.0622,
+            longitudeDelta: 0.0421,
           }
         });
       }, err => console.log(err));
     }
 
     render(){
+
+        console.log(this.state.routeSuggestions);
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation}/>
+              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination}/>
             </View>        
             <View style={styles.flowRight}>
               <TextInput
@@ -135,6 +146,7 @@ export default class SearchPage extends Component{
         );
     }
 }
+
 
 const styles = StyleSheet.create({
       description: {

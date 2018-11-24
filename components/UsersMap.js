@@ -2,12 +2,33 @@ import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import MapView from 'react-native-maps';
 
+
+//Component used to show map
 const usersMap = props => {
     let userLocationMarker = null;
+    let userDestinationMarker  = null;
+
+    this.state = {
+        markers : [],
+    };
 
     if (props.userLocation) {
-        userLocationMarker = <MapView.Marker coordinate={props.userLocation} />
+        userLocationMarker = <MapView.Marker coordinate={props.userLocation} pinColor="teal" />
     }
+
+    if (props.destinationLocation) {
+        userDestinationMarker = <MapView.Marker coordinate={props.destinationLocation} />
+    }
+
+   // if (this.state.markers.length != 0){ //if we have stops to mark
+    //    stopMarker = <MapView.Marker 
+     //       coordinate={{
+      //          longitude: marker.longitude,
+     //           latitude: marker.latitude
+     //       }}
+     //   />
+   //}
+
     return (
         <View style={styles.mapContainer}>
             <MapView 
@@ -22,6 +43,12 @@ const usersMap = props => {
                 style={styles.map}> 
                 
                 {userLocationMarker}
+                {userDestinationMarker}
+                {this.state.markers.map(marker =>(
+                <MapView.Marker coordinate={{longitude: marker.longitude, latitude: marker.latitude}} />
+                ))}
+               
+                
 
             </MapView>
         </View>
