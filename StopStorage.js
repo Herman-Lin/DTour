@@ -2,7 +2,7 @@
  * Stop is a class that encapsulates stop.
  * Construct with a Yelp Fusion API object with 1 argument, or using lat and long with 2 arguments 
  */
-class Stop {
+export class Stop {
     /**
      * @param {String} lat Latitude of the Stop, or Yelp Fusion API json string
      * @param {Number} long Longitude of the stop, or undefined if using Yelp Fusion API
@@ -11,6 +11,7 @@ class Stop {
         if (long === undefined) {
             this.latitude = JSON.parse(lat).coordinates.latitude;
             this.longitude = JSON.parse(lat).coordinates.longitude;
+            this.info = JSON.parse(lat);
         }
         else {
             this.latitude = lat;
@@ -20,7 +21,8 @@ class Stop {
 
     getLatitude() {return this.latitude;}
     getLongitude() {return this.longitude;}
-
+    getInfo() {return this.info;}
+    
     /**
      * Calculate distance with `anotherStop` based on lat and long.
      * 
@@ -60,11 +62,11 @@ class Stop {
  * the top one is the most recommended one.
  * 
  * Different subclasses have different algorithms
- * for suggesting posible routes.
+ * for suggesting possible routes.
  * 
  * Using ES6 class sugar syntax.
  */
-class OrAndRouteSuggester {
+export class OrAndRouteSuggester {
   /**
    * Abstract method that suggests routes - to be implemented by subclasses
    * Different subclasses will have different strategies to provide route suggestion
@@ -170,7 +172,7 @@ class OrAndRouteSuggester {
  * LatLongOrAndRouteSuggester is an implementation of the abstract
  * strategy OrAndRouteSuggester.
  */
-class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
+export class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
     /**
      * Public method suggest() calculates Euclidean distance among an array of
      * latitude and longitude coordinates. This method utilizes a crude brute
@@ -227,95 +229,178 @@ class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
  * information hiding and data storage of route and stop information
  */
 export class StopStorage {
-    constructor() {
-        this._stops = []; // {Array.Array.Stop} potential candidates of waypoint
-        this._start = null; // {Stop} User's route start point 
-        this._destination = null;  // {Stop} User's destination
-        this.suggester = new LatLongOrAndRouteSuggester(); // Route Suggest Handler
-    }
-  /**
-   * Public setter of user's start location
-   * 
-   * @param {String} lat JSON String of Yelp Fusion API, or the current latitude of user's location
-   * @param {Number} long current latitude of user's location
-   */
-    setStart(lat, long) {
-        if (long === undefined) {
-        this._start = new Stop(lat);
-        } else {
-        this._start = new Stop(lat, long);
-        }
-  }
-  /**
-   * Using an Yelp API Return JSON as destination.
-   * 
-   * @param {string} json Yelp API json
-   */
-    setDestination(json) {
-        this._destination = new Stop(json);
-    }
-    /**
-     * Add a specific stop using a single Yelp Fusion API json string, or
-     * an array of candidate Yelp Fusion API string as stops
-     * 
-     * @param {String} listOfJson String or Array of string which user selected as desired stops
-     */
-    addStop(listOfJson) {
-        if (listOfJson.constructor === Array) {
-            var list = [];
-            listOfJson.forEach(function (j) {
-                list.push(new Stop(j));
-            });
-            this._stops.push(list);
-        }
-        else {
-            this._stops.push([new Stop(listOfJson)]);
-        }
-  }
-  /**
-   * Public method that retrieves the current optimal stops along with the necessary json to construct a map view
-   *  
-   * @returns {Array.String} return 10 route suggestions in the format of Array 
-   *                         of {viewport: {northeast: {lat, long}, southwest: {lat, long}},
-   *                             coordinates: array, 
-   *                             polyline: string, 
-   *                             time: string}
-   */
-  getSuggestion() {
-    if (this._start == null)
-      throw "The UI has not called setStart() with current location or user address location";
-    if (this._destination == null)
-      throw "The UI has not called setDestination() with a valid yelp json string";
-    //mode = "DRIVING";
-    var mode = "WALKING";
-    // mode = "BICYCLING";
-    // mode = "TRANSIT";
-    var results = [];
-    this.suggester.suggest(this._start, this._stops, this._destination, 10).forEach(function (routes) {
-          var waypoints = "";
-          const Http = new XMLHttpRequest();
-          for (var i = 1; i < routes.length - 1; i++) {
-            waypoints += "via:" + String(routes[i].latitude) + "," + String(routes[i].longitude) + "|"
-          }
-          waypoints = waypoints.substring(0, waypoints.length - 1);
-          var url = "https://maps.googleapis.com/maps/api/directions/json?origin=" + routes[0].latitude + "," + routes[0].longitude +
-          "&destination=" + routes[routes.length-1].latitude + "," + routes[routes.length-1].longitude + "&mode=" + mode + "&waypoints=" + waypoints + "&key=AIzaSyDH6H2IlW_LHCmfh0CV0-aS9aR19XMsn94";
-          console.log(url);
-          Http.open("GET", url);
-          Http.send();
-          Http.onreadystatechange = e => {
-            if (Http.readyState == 4 && Http.status == 200) {
-                let response = JSON.parse(Http.responseText);
-                var routeDetail = {"viewport": response.routes[0].bounds,
-                                   "coordinates": routes,
-                                   "polyline": response.routes[0].overview_polyline.points,
-                                   "time": response.routes[0].legs[0].duration.text}
-                results.push(routeDetail);
-            }
-        }
-    });
-    return results;
-  }
-}
+         constructor() {
+           this._stops = []; // {Array.Array.Stop} potential candidates of waypoint
+           this._start = null; // {Stop} User's route start point
+           this._destination = null; // {Stop} User's destination
+           this._routes = []; // {Array.Array.Stop} Suggested Routes
+           this.suggester = new LatLongOrAndRouteSuggester(); // Route Suggest Handler
+         }
+         /**
+          * Public setter of user's start location
+          *
+          * @param {String} lat JSON String of Yelp Fusion API, or the current latitude of user's location
+          * @param {Number} long current latitude of user's location
+          */
+         setStart(lat, long) {
+           if (long === undefined) {
+             this._start = new Stop(lat);
+           } else {
+             this._start = new Stop(lat, long);
+           }
+         }
+         /**
+          * Using an Yelp API Return JSON as destination.
+          *
+          * @param {string} json Yelp API json
+          */
+         setDestination(json) {
+           this._destination = new Stop(json);
+         }
+         /**
+          * Add a specific stop using a single Yelp Fusion API json string, or
+          * an array of candidate Yelp Fusion API string as stops
+          *
+          * @param {String} listOfJson String or Array of string which user selected as desired stops
+          */
+         addStop(listOfJson) {
+           if (listOfJson.constructor === Array) {
+             var list = [];
+             listOfJson.forEach(function(j) {
+               list.push(new Stop(j));
+             });
+             this._stops.push(list);
+           } else {
+             this._stops.push([new Stop(listOfJson)]);
+           }
+         }
+         /**
+          * Returns current coordinate for the start position
+          * @returns {Stop} contains latitude and longitude field
+          */
+         getStart() {
+           if (this._start === undefined) return null;
+           else return this._start;
+         }
 
-module.exports = {Stop, OrAndRouteSuggester, LatLongOrAndRouteSuggester}
+         /**
+          * Returns current coordinate for the destination position
+          * @returns {Stop} contains latitude and longitude and destination Yelp json by calling getter functions 
+          */
+         getDestination() {
+           if (this._destination === undefined) return null;
+           else return this._destination;
+         }
+         /**
+          * Returns current coordinate for the destination position
+          * @returns {Stop} contains latitude and longitude and destination Yelp json by calling getter functions 
+          */
+         getAllStops(){
+             return this._stops;
+         }
+         /**
+          * Deletes a stop based on GPS coordinate provided
+          * @returns {boolean} True if deleted, false if None found 
+          */
+         deleteStopByCoordinate(lat, long){
+            if (this.start !== undefined && this._start.getLatitude() == lat && this._start.getLongitude() == long) {
+                this._start = null;
+            }
+            else if (this._destination !== undefined && this._start.getLatitude == lat && this._destination.getLongitude == long) {
+                this._destination = null;
+            }
+            else {
+                for (var i = 0; i < this._stops.length; i++) {
+                    for (var j = 0; j < this._stops[i].length; j++) {
+                        if (this._stops[i][j].getLatitude() == lat && this._stops[i][j].getLongitude() == long) {
+                            this._stops[i].splice(j, j+1);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+         }
+         /**
+          * Deletes a stop based on Yelp JSON (Stop.info)
+          * @returns {boolean} True if deleted, false if None found 
+          */
+         deleteStopByJSON(json) {
+             var jobj = JSON.parse(json);
+             var lat = jobj.coordinates.latitude;
+             var long = jobj.coordinates.longitude;
+
+             if (this.start !== undefined && this._start.getLatitude() == lat && this._start.getLongitude() == long) {
+                 this._start = null;
+             }
+             else if (this._destination !== undefined && this._start.getLatitude == lat && this._destination.getLongitude == long) {
+                 this._destination = null;
+             }
+             else {
+                 for (var i = 0; i < this._stops.length; i++) {
+                     for (var j = 0; j < this._stops[i].length; j++) {
+                         if (this._stops[i][j].getLatitude() == lat && this._stops[i][j].getLongitude() == long) {
+                             this._stops[i].splice(j, j + 1);
+                             return true;
+                         }
+                     }
+                 }
+             }
+             return false;
+         }
+         /**
+          * Public async method that retrieves the current optimal stops along with the necessary json to construct a map view
+          *
+          * @param {function} fn function that takes one argument as the result of the suggestion.
+          *                      It would contain 10 route suggestions in the format of Array
+          *                      of {viewport: {northeast: {lat, long}, southwest: {lat, long}},
+          *                          coordinates: array,
+          *                          polyline: string,
+          *                          time: string}
+          */
+         getSuggestion(callback) {
+           if (this._start == null) throw "The UI has not called setStart() with current location or user address location";
+           if (this._destination == null) throw "The UI has not called setDestination() with a valid yelp json string";
+           this._routes = [];
+           //mode = "driving";
+           var mode = "walking";
+           // mode = "bicycling";
+           // mode = "transit";
+           var results = [];
+           var routes = this.suggester.suggest(this._start, this._stops, this._destination, 10);
+           this._stops = routes.slice(1, routes.length - 1);
+           var routesLeft = routes.length;
+           routes.forEach(function(route) {
+             var waypoints = "";
+             const Http = new XMLHttpRequest();
+             for (var i = 1; i < route.length - 1; i++) {
+               waypoints += "via:" + String(route[i].latitude) + "," + String(route[i].longitude) + "|";
+             }
+             waypoints = waypoints.substring(0, waypoints.length - 1);
+             var url = "https://maps.googleapis.com/maps/api/directions/json?origin=" + route[0].latitude + "," + route[0].longitude + "&destination=" + route[route.length - 1].latitude + "," + route[route.length - 1].longitude + "&mode=" + mode + "&waypoints=" + waypoints + "&key=AIzaSyDH6H2IlW_LHCmfh0CV0-aS9aR19XMsn94";
+             Http.open("GET", url);
+             // console.log(url);
+             Http.send();
+             Http.onreadystatechange = e => {
+               if (Http.readyState == 4 && Http.status == 200) {
+                 let response = JSON.parse(Http.responseText);
+                 var routeDetail = {
+                   viewport: response.routes[0].bounds, coordinates: route, polyline: response.routes[0].overview_polyline.points, time: {
+                     text: response.routes[0].legs[0].duration.text, value: response.routes[0].legs[0].duration.value}};
+                 results.push(routeDetail);
+                 routesLeft--;
+                 if (routesLeft === 0) {
+                   results.sort(function(routeA, routeB) {
+                      var keyA = routeA.time.value;
+                      var keyB = routeB.time.value;
+                      if (keyA < keyB) return -1;
+                      if (keyB < keyA) return 1;
+                      return 0;
+                   })
+                   callback(results);
+                 }
+               }
+             };
+           });
+         }
+       }

@@ -22,24 +22,23 @@ import LocationList from './components/LocationList';
 export default class AddStopPage extends Component{
     constructor(props) {
       super(props);
-      this.stopStorage = new StopStorage(); 
-      this.stopStorage.setStart(34.069872, -118.453163);
-      this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}");
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"]);
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]);
-      this.getUserLocationHandler(); //get user location
+      this.stopStorage = new StopStorage();
+      this.getUserLocationHandler(); 
+
+      // Below are examples of how to use stopStorage interface:
+      this.yourCallBackFunctionHere = function (suggestedRoutes) {
+        // Insert your logic here
+        // un-set waiting screen set
+        console.log(suggestedRoutes); 
+      }
+
       this.state = {
         isLoading: false,
-        textValue: 'JSON response will be shown',
         results: [],
         addressSuggestions: [],
         userLocation: null,
-        routeSuggestions: this.stopStorage.getSuggestion(),
-        searchString1: "",
-        searchString2: "",
-        searchString3: "",
-        suggestions: this.stopStorage.getSuggestion()
       };
+
     }
 
     /**
@@ -177,7 +176,26 @@ export default class AddStopPage extends Component{
                 {/*<Text>{this.state.textValue}</Text>*/}
                 <LocationList results={this.state.results}/>
             </View>
-            <Button onPress={() => {console.log(this.state.suggestions);}} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
+            <Button onPress={() => {
+              // Example of using stopStorage 
+              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
+              this.stopStorage.setStart(34.069872, -118.453163); // Can be initialized with GPS coordinatrs - Koyoshi's Apartment
+              this.stopStorage.setStart(yelpJsonReturnString); // Can also initialized Yelp Fusion API 
+              this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}"); // Can only be set through Yelp Fusion API json value
+              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"); // Can add a stop with Yelp Fusion API json return string
+              this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]); // Can also add a selection of stops (candidates) in a list of Yelp Fusion API json
+              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere);
+              // Display UI waiting screen
+              console.log(this.stopStorage.getAllStops()); // Sorted
+              this.stopStorage.deleteStopByCoordinate(34.069196, -118.445722);
+              console.log(this.stopStorage.getAllStops()); // The above stop will be deleted;
+              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}");
+              this.stopStorage.deleteStopByJSON('{"coordinates": {"latitude":34.063596,"longitude":-118.444074}}');
+              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere); // Suggested route will be updated
+              // Display UI waiting screen
+              console.log(this.stopStorage.getStart());
+              console.log(this.stopStorage.getDestination());
+            }} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
           </View>
         );
     }

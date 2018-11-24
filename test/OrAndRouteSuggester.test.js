@@ -1,4 +1,4 @@
-const {Stop, OrAndRouteSuggester, LatLongOrAndRouteSuggester} = require('../StopStorage');
+const {Stop, OrAndRouteSuggester} = require('../StopStorage');
 
 test('Test OrAndRouteSuggester._get_all_possible_routes()', () => {
 	start = new Stop(0,0);

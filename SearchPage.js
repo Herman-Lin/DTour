@@ -23,19 +23,13 @@ import LocationList from './components/LocationList';
 export default class SearchPage extends Component{
     constructor(props) {
       super(props);
-      this.stopStorage = new StopStorage(); 
       this.getUserLocationHandler(); //get user location at startup
-      this.stopStorage.setStart(34.069872, -118.453163);
-      this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}");
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"]);
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]);
       this.state = {
         isLoading: false,
         textValue: 'JSON response will be shown',
         results: [],
         addressSuggestions: [],
         userLocation: null,
-        routeSuggestions: this.stopStorage.getSuggestion(),
       };
     }
 
