@@ -151,26 +151,31 @@ export default class AddStopPage extends Component{
     render(){
         const spinner = this.state.isLoading ? <ActivityIndicator size='large'/> : null;
         return (
-          <View style={{flex: 1}}>
+          <View style={{flex: 1, backgroundColor: 'white'}}>
             <View style={styles.planningBoard}>
-              <TextInput
-                style={styles.searchInput}
-                value={this.state.searchString1}
-                onSubmitEditing={this._onSearchPressed1}
-                onChange={this._onSearchTextChanged1}
-                placeholder='Current Location'/>
-              <TextInput
-                style={styles.searchInput}
-                value={this.state.searchString2}
-                onSubmitEditing={this._onSearchPressed2}
-                onChange={this._onSearchTextChanged2}
-                placeholder='Add a Stop'/>
-              <TextInput autoFocus
-                style={styles.searchInput}
-                value={this.state.searchString3}
-                onSubmitEditing={this._onSearchPressed3}
-                onChange={this._onSearchTextChanged3}
-                placeholder='Destination'/>
+              <View style={styles.planningBoardInput}>
+                <TextInput
+                  style={styles.searchInput}
+                  value={this.state.searchString1}
+                  onSubmitEditing={this._onSearchPressed1}
+                  onChange={this._onSearchTextChanged1}
+                  placeholder='Current Location'/>
+                <TextInput
+                  style={styles.searchInput}
+                  value={this.state.searchString2}
+                  onSubmitEditing={this._onSearchPressed2}
+                  onChange={this._onSearchTextChanged2}
+                  placeholder='Add a Stop'/>
+                <TextInput autoFocus
+                  style={styles.searchInput}
+                  value={this.state.searchString3}
+                  onSubmitEditing={this._onSearchPressed3}
+                  onChange={this._onSearchTextChanged3}
+                  placeholder='Destination'/>
+              </View>
+              <View style={styles.planningBoardButton}>
+                <Button title="+" style={styles.addStopButton} color='black'/>
+              </View>
             </View>
             <View style={styles.container}>
                 {/*<Text>{this.state.textValue}</Text>*/}
@@ -199,6 +204,8 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         flex: 5,
       },
+      addStopButton:{
+      },
       generateButton:{
         flex: 1,
       },
@@ -216,10 +223,21 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         shadowColor: '#000',
-        shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        flex: 3,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        flexDirection: 'row',
+        elevation: 3,
+        zIndex: 10
+      },
+      planningBoardInput: {
+        marginLeft: 20,
+        flex: 3
+      },
+      planningBoardButton: {
+        marginTop: 6,
+        marginLeft: 15,
+        marginRight: 5
       },
       searchInput: {
         padding: 15,
