@@ -37,9 +37,13 @@ export default class AddStopPage extends Component{
         results: [],
         addressSuggestions: [],
         userLocation: null,
+        currentSearch: null,
+        currentSearchResult: null,
+        currentStops: [], //help for deletion later, holds json of stops
       };
 
     }
+
 
     /**
      * Given an address, change addressSuggestion in state to corresponding array of {address, ID}
@@ -109,7 +113,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed1 = () => {
       if (this.state.searchString1 === undefined || this.state.searchString1 == "") return;
       this.yelp_search(this.state.searchString1, +34.06893, -118.445127);
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, currentSearch: 1 });
       console.log(this.state.routeSuggestions);
     };
 
@@ -120,7 +124,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = () => {
       if (this.state.searchString2 === undefined || this.state.searchString2 == "") return;
       this.yelp_search(this.state.searchString2, +34.06893, -118.445127);
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, currentSearch: 2 });
       console.log(this.state.routeSuggestions);
     };
 
@@ -131,7 +135,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed3 = () => {
       if (this.state.searchString3 === undefined || this.state.searchString3 == "") return;
       this.yelp_search(this.state.searchString3, +34.06893, -118.445127);
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, currentSearch: 3 });
       console.log(this.state.routeSuggestions);
     };
 
@@ -146,6 +150,27 @@ export default class AddStopPage extends Component{
           }
         });
       }, err => console.log(err));
+    }
+
+    onAddStop = (r) => {
+        this.stopStorage.addStop(r);
+        this.setState({currentSearchResult: r, results: []});
+        let result = JSON.parse(r);
+        if(this.state.currentSearch === 1){
+            this.state.searchString1 = result.name;
+            this.state.currentStops[1] = r;
+        }
+        else if(this.state.currentSearch === 2){
+            this.state.searchString2 = result.name;
+            this.state.currentStops[2] = r;
+        }
+        else if(this.state.currentSearch === 3){
+            this.state.searchString3 = result.name;
+            this.state.currentStops[3] = r;
+        }
+        else{
+            return;
+        }
     }
 
     render(){
@@ -174,27 +199,29 @@ export default class AddStopPage extends Component{
             </View>
             <View style={styles.container}>
                 {/*<Text>{this.state.textValue}</Text>*/}
-                <LocationList results={this.state.results}/>
+                <LocationList addStop={this.onAddStop} results={this.state.results}/>
             </View>
             <Button onPress={() => {
               // Example of using stopStorage 
-              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
-              this.stopStorage.setStart(34.069872, -118.453163); // Can be initialized with GPS coordinatrs - Koyoshi's Apartment
-              this.stopStorage.setStart(yelpJsonReturnString); // Can also initialized Yelp Fusion API 
-              this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}"); // Can only be set through Yelp Fusion API json value
-              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"); // Can add a stop with Yelp Fusion API json return string
-              this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]); // Can also add a selection of stops (candidates) in a list of Yelp Fusion API json
-              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere);
-              // Display UI waiting screen
-              console.log(this.stopStorage.getAllStops()); // Sorted
-              this.stopStorage.deleteStopByCoordinate(34.069196, -118.445722);
-              console.log(this.stopStorage.getAllStops()); // The above stop will be deleted;
-              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}");
-              this.stopStorage.deleteStopByJSON('{"coordinates": {"latitude":34.063596,"longitude":-118.444074}}');
-              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere); // Suggested route will be updated
-              // Display UI waiting screen
-              console.log(this.stopStorage.getStart());
-              console.log(this.stopStorage.getDestination());
+//              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
+//              this.stopStorage.setStart(34.069872, -118.453163); // Can be initialized with GPS coordinatrs - Koyoshi's Apartment
+//              this.stopStorage.setStart(yelpJsonReturnString); // Can also initialized Yelp Fusion API
+//              this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}"); // Can only be set through Yelp Fusion API json value
+//              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"); // Can add a stop with Yelp Fusion API json return string
+//              this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]); // Can also add a selection of stops (candidates) in a list of Yelp Fusion API json
+//              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere);
+//              // Display UI waiting screen
+//              console.log(this.stopStorage.getAllStops()); // Sorted
+//              this.stopStorage.deleteStopByCoordinate(34.069196, -118.445722);
+//              console.log(this.stopStorage.getAllStops()); // The above stop will be deleted;
+//              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}");
+//              this.stopStorage.deleteStopByJSON('{"coordinates": {"latitude":34.063596,"longitude":-118.444074}}');
+//              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere); // Suggested route will be updated
+//              // Display UI waiting screen
+//              console.log(this.stopStorage.getStart());
+//              console.log(this.stopStorage.getDestination());
+
+                this.stopStorage.getAllStops();
             }} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
           </View>
         );
@@ -216,10 +243,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 6,
-        flex: 5,
+        height:300,
       },
       generateButton:{
-        flex: 1,
+
       },
       flowRight: {
         flexDirection: 'row',
@@ -238,13 +265,14 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 2, height: 5 },
         shadowOpacity: 0.2,
         shadowRadius: 2,
-        flex: 3,
+        height:250,
       },
       searchInput: {
         padding: 15,
         fontSize: 17,
         borderBottomColor: '#9B9B9B',
-        borderBottomWidth: 0.5
+        borderBottomWidth: 0.5,
+        textAlign: 'left',
       },
       map: {
         width: '100%',
