@@ -40,6 +40,7 @@ export default class AddStopPage extends Component{
         currentSearch: null,
         currentSearchResult: null,
         currentStops: [], //help for deletion later, holds json of stops
+        stopSearchStrings: [], // holds the search strings for stops
       };
 
     }
@@ -106,36 +107,36 @@ export default class AddStopPage extends Component{
 
     _onSearchTextChanged1 = (event) => {
       //console.log('_onSearchTextChanged');
-      this.setState({ searchString1: event.nativeEvent.text });
+      this.setState({ startSearchString: event.nativeEvent.text });
       // console.log('Current: '+this.state.searchString+', Next: '+event.nativeEvent.text);
     };
 
     _onSearchPressed1 = () => {
-      if (this.state.searchString1 === undefined || this.state.searchString1 == "") return;
-      this.yelp_search(this.state.searchString1, +34.06893, -118.445127);
-      this.setState({ isLoading: true, currentSearch: 1 });
+      if (this.state.startSearchString === undefined || this.state.startSearchString == "") return;
+      this.yelp_search(this.state.startSearchString, +34.06893, -118.445127);
+      this.setState({ isLoading: true, currentSearch: -1 });
       console.log(this.state.routeSuggestions);
     };
 
     _onSearchTextChanged2 = (event) => {
-      this.setState({ searchString2: event.nativeEvent.text });
+      this.state.stopSearchStrings[0] = event.nativeEvent.text;
     };
 
     _onSearchPressed2 = () => {
-      if (this.state.searchString2 === undefined || this.state.searchString2 == "") return;
-      this.yelp_search(this.state.searchString2, +34.06893, -118.445127);
-      this.setState({ isLoading: true, currentSearch: 2 });
+      if (this.state.stopSearchStrings[0] === undefined || this.state.stopSearchStrings[0] == "") return;
+      this.yelp_search(this.state.stopSearchStrings[0], +34.06893, -118.445127);
+      this.setState({ isLoading: true, currentSearch: 0 }); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
     _onSearchTextChanged3 = (event) => {
-      this.setState({ searchString3: event.nativeEvent.text });
+      this.setState({ destSearchString: event.nativeEvent.text });
     };
 
     _onSearchPressed3 = () => {
-      if (this.state.searchString3 === undefined || this.state.searchString3 == "") return;
-      this.yelp_search(this.state.searchString3, +34.06893, -118.445127);
-      this.setState({ isLoading: true, currentSearch: 3 });
+      if (this.state.destSearchString === undefined || this.state.destSearchString == "") return;
+      this.yelp_search(this.state.destSearchString, +34.06893, -118.445127);
+      this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
       console.log(this.state.routeSuggestions);
     };
 
@@ -153,23 +154,20 @@ export default class AddStopPage extends Component{
     }
 
     onAddStop = (r) => {
-        this.stopStorage.addStop(r);
         this.setState({currentSearchResult: r, results: []});
         let result = JSON.parse(r);
-        if(this.state.currentSearch === 1){
-            this.state.searchString1 = result.name;
-            this.state.currentStops[1] = r;
+        if(this.state.currentSearch === -1){ // start point
+            this.state.startSearchString = result.name;
+            //set start
         }
-        else if(this.state.currentSearch === 2){
-            this.state.searchString2 = result.name;
-            this.state.currentStops[2] = r;
+        else if(this.state.currentSearch === -2){ //destination
+            this.state.destSearchString = result.name;
+            this.stopStorage.setDestination(r);
         }
-        else if(this.state.currentSearch === 3){
-            this.state.searchString3 = result.name;
-            this.state.currentStops[3] = r;
-        }
-        else{
-            return;
+        else{ // stops
+            this.state.stopSearchStrings[this.state.currentSearch] = result.name;
+            this.state.currentStops[this.state.currentSearch] = r;
+            this.stopStorage.addStop(r);
         }
     }
 
@@ -180,19 +178,19 @@ export default class AddStopPage extends Component{
             <View style={styles.planningBoard}>
               <TextInput
                 style={styles.searchInput}
-                value={this.state.searchString1}
+                value={this.state.startSearchString}
                 onSubmitEditing={this._onSearchPressed1}
                 onChange={this._onSearchTextChanged1}
                 placeholder='Current Location'/>
               <TextInput
                 style={styles.searchInput}
-                value={this.state.searchString2}
+                value={this.state.stopSearchStrings[0]}
                 onSubmitEditing={this._onSearchPressed2}
                 onChange={this._onSearchTextChanged2}
                 placeholder='Add a Stop'/>
               <TextInput autoFocus
                 style={styles.searchInput}
-                value={this.state.searchString3}
+                value={this.state.destSearchString}
                 onSubmitEditing={this._onSearchPressed3}
                 onChange={this._onSearchTextChanged3}
                 placeholder='Destination'/>
