@@ -23,19 +23,13 @@ import LocationList from './components/LocationList';
 export default class SearchPage extends Component{
     constructor(props) {
       super(props);
-      this.stopStorage = new StopStorage(); 
       this.getUserLocationHandler(); //get user location at startup
-      this.stopStorage.setStart(34.069872, -118.453163);
-      this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}");
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"]);
-      this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]);
       this.state = {
         isLoading: false,
         textValue: 'JSON response will be shown',
         results: [],
         addressSuggestions: [],
         userLocation: null,
-        routeSuggestions: this.stopStorage.getSuggestion(),
       };
     }
 
@@ -111,6 +105,8 @@ export default class SearchPage extends Component{
     //   console.log(this.state.routeSuggestions);
     // };
 
+
+
     getUserLocationHandler = () => {
       navigator.geolocation.getCurrentPosition(position => {
         this.setState({
@@ -119,16 +115,25 @@ export default class SearchPage extends Component{
             longitude: position.coords.longitude,
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
+          },
+
+          userDestination: {
+            latitude: 35.0000,
+            longitude: -119.000,
+            latitudeDelta: 0.0622,
+            longitudeDelta: 0.0421,
           }
         });
       }, err => console.log(err));
     }
 
     render(){
+
+        console.log(this.state.routeSuggestions);
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation}/>
+              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination}/>
             </View>        
             <View style={styles.flowRight}>
               <TextInput
@@ -141,6 +146,7 @@ export default class SearchPage extends Component{
         );
     }
 }
+
 
 const styles = StyleSheet.create({
       description: {
