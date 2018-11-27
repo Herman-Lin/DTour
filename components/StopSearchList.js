@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   searchInput: {
+    marginLeft: 20,
     padding: 15,
     fontSize: 17,
     borderBottomColor: '#9B9B9B',
@@ -39,8 +40,8 @@ const styles = StyleSheet.create({
   },
   removeStopButton: {
     marginTop: 10,
-    marginLeft: 17,
-    marginRight: -30,
+    marginLeft: 15,
+    marginRight: 5,
   },
   removeStopButtonText: {
     textAlign:'center',

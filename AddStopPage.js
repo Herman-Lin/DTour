@@ -189,9 +189,9 @@ export default class AddStopPage extends Component{
     }
 
     removeStop = (index) => {
-      this.setState(state => {
-        stopList: this.state.stopList.filter((item, _index1) => index !== _index1);
-        stopSearchStrings: this.state.stopList.filter((val, _index2) => index !== _index2);
+      this.setState({
+        stopList: this.state.stopList.filter((item, _index1) => index !== _index1),
+        stopSearchStrings: this.state.stopSearchStrings.filter((val, _index2) => index !== _index2)
       });
     }
 
@@ -223,31 +223,31 @@ export default class AddStopPage extends Component{
         return (
           <View style={{flex: 1, backgroundColor: 'white'}}>
             <View style={styles.planningBoard}>
-            <View style={styles.planningBoardInput}>
-              <TextInput
-                style={styles.searchInput}
-                value={this.state.startSearchString}
-                onSubmitEditing={this._onSearchPressed1}
-                onChange={this._onSearchTextChanged1}
-                placeholder='Current Location'/>
-              <StopSearchList stops={this.state.stopList}
-                              searchString={this.state.stopSearchStrings}
-                              changeFunc={this._onSearchTextChanged2}
-                              submitFunc={this._onSearchPressed2}
-                              removeFunc={this.removeStop}/>
-              <TextInput autoFocus
-                style={styles.searchInput}
-                value={this.state.destSearchString}
-                onSubmitEditing={this._onSearchPressed3}
-                onChange={this._onSearchTextChanged3}
-                placeholder='Destination'/>
-              </View>
-              <View style={styles.planningBoardButton}>
+              <View style={styles.startSearchBar}>
+                <TextInput
+                  style={styles.searchInput}
+                  value={this.state.startSearchString}
+                  onSubmitEditing={this._onSearchPressed1}
+                  onChange={this._onSearchTextChanged1}
+                  placeholder='Current Location'/>
                 <TouchableOpacity
                   style={styles.addStopButton}
                   onPress={this.addStopSearchBar}>
                   <Text style={styles.addStopButtonText}>+</Text>
                 </TouchableOpacity>
+              </View>
+              <StopSearchList stops={this.state.stopList}
+                              searchString={this.state.stopSearchStrings}
+                              changeFunc={this._onSearchTextChanged2}
+                              submitFunc={this._onSearchPressed2}
+                              removeFunc={this.removeStop}/>
+              <View style={styles.destSearchBar}>
+                <TextInput autoFocus
+                  style={styles.searchInput}
+                  value={this.state.destSearchString}
+                  onSubmitEditing={this._onSearchPressed3}
+                  onChange={this._onSearchTextChanged3}
+                  placeholder='Destination'/>
               </View>
             </View>
             <View style={styles.container}>
@@ -283,6 +283,9 @@ const styles = StyleSheet.create({
         height: 400,
       },
       addStopButton:{
+        marginTop: 10,
+        marginRight: 5,
+        marginLeft: 15
       },
       addStopButtonText:{
         textAlign:'center',
@@ -330,26 +333,25 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-        flexDirection: 'row',
         elevation: 3,
         zIndex: 10,
       },
-      planningBoardInput: {
-        marginLeft: 20,
-        marginBottom: 20,
-        flex: 3
+      startSearchBar: {
+        flexDirection: 'row',
       },
-      planningBoardButton: {
-        marginTop: 9,
-        marginLeft: 15,
-        marginRight: 5
+      destSearchBar: {
+        flexDirection: 'row',
+        marginRight: 35,
+        marginBottom: 25,
       },
       searchInput: {
+        marginLeft: 20,
         padding: 15,
         fontSize: 17,
         borderBottomColor: '#9B9B9B',
         borderBottomWidth: 0.5,
         textAlign: 'left',
+        flex: 3
       },
       map: {
         width: '100%',
