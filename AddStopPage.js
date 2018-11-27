@@ -36,6 +36,7 @@ export default class AddStopPage extends Component{
         isLoading: false,
         results: [],
         addressSuggestions: [],
+        addressResult: null,
         userLocation: null,
       };
 
@@ -63,6 +64,25 @@ export default class AddStopPage extends Component{
         }
       };
     };
+
+  address_suggestion_to_coord = (suggestion) => {
+    this.setState(
+      { addressResult: null }
+    );
+    var suggestionObj = JSON.parse(suggestion);
+    const Http = new XMLHttpRequest();
+    var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + encodeURIComponent(suggestionObj.place_id) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M";
+    Http.open("GET", url);
+    Http.send();
+    Http.onreadystatechange = e => {
+      if (Http.readyState == 4 && Http.status == 200) {
+        let response = JSON.parse(Http.responseText);
+        this.setState(
+          { addressResult: {"coordinates": {"latitude": response.geometry.location.lat, "longitude": response.geometry.location.lng}}}
+        );
+      }
+    };
+  };
 
     yelp_search = (search_str, latitude, longitude) => {
       const Http = new XMLHttpRequest();
