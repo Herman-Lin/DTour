@@ -171,6 +171,29 @@ export default class AddStopPage extends Component{
         }
     }
 
+    //             <Button onPress={() => {
+    //               // Example of using stopStorage
+    // //              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
+    // //              this.stopStorage.setStart(34.069872, -118.453163); // Can be initialized with GPS coordinatrs - Koyoshi's Apartment
+    // //              this.stopStorage.setStart(yelpJsonReturnString); // Can also initialized Yelp Fusion API
+    // //              this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}"); // Can only be set through Yelp Fusion API json value
+    // //              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"); // Can add a stop with Yelp Fusion API json return string
+    // //              this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]); // Can also add a selection of stops (candidates) in a list of Yelp Fusion API json
+    // //              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere);
+    // //              // Display UI waiting screen
+    // //              console.log(this.stopStorage.getAllStops()); // Sorted
+    // //              this.stopStorage.deleteStopByCoordinate(34.069196, -118.445722);
+    // //              console.log(this.stopStorage.getAllStops()); // The above stop will be deleted;
+    // //              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}");
+    // //              this.stopStorage.deleteStopByJSON('{"coordinates": {"latitude":34.063596,"longitude":-118.444074}}');
+    // //              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere); // Suggested route will be updated
+    // //              // Display UI waiting screen
+    // //              console.log(this.stopStorage.getStart());
+    // //              console.log(this.stopStorage.getDestination());
+    //
+    //                 this.stopStorage.getAllStops();
+    //             }} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
+
     render(){
         const spinner = this.state.isLoading ? <ActivityIndicator size='large'/> : null;
         return (
@@ -195,37 +218,21 @@ export default class AddStopPage extends Component{
                 onSubmitEditing={this._onSearchPressed3}
                 onChange={this._onSearchTextChanged3}
                 placeholder='Destination'/>
+              </View>
               <View style={styles.planningBoardButton}>
                 <Button title="+" style={styles.addStopButton} color='black'/>
               </View>
-            </View>
             </View>
             <View style={styles.container}>
                 {/*<Text>{this.state.textValue}</Text>*/}
                 <LocationList addStop={this.onAddStop} results={this.state.results}/>
             </View>
-            <Button onPress={() => {
-              // Example of using stopStorage
-//              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
-//              this.stopStorage.setStart(34.069872, -118.453163); // Can be initialized with GPS coordinatrs - Koyoshi's Apartment
-//              this.stopStorage.setStart(yelpJsonReturnString); // Can also initialized Yelp Fusion API
-//              this.stopStorage.setDestination("{\"coordinates\": {\"latitude\":34.063596,\"longitude\":-118.444074}}"); // Can only be set through Yelp Fusion API json value
-//              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}"); // Can add a stop with Yelp Fusion API json return string
-//              this.stopStorage.addStop(["{\"coordinates\": {\"latitude\":34.074550,\"longitude\":-118.438659}}"]); // Can also add a selection of stops (candidates) in a list of Yelp Fusion API json
-//              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere);
-//              // Display UI waiting screen
-//              console.log(this.stopStorage.getAllStops()); // Sorted
-//              this.stopStorage.deleteStopByCoordinate(34.069196, -118.445722);
-//              console.log(this.stopStorage.getAllStops()); // The above stop will be deleted;
-//              this.stopStorage.addStop("{\"coordinates\": {\"latitude\":34.069196,\"longitude\":-118.445722}}");
-//              this.stopStorage.deleteStopByJSON('{"coordinates": {"latitude":34.063596,"longitude":-118.444074}}');
-//              this.stopStorage.getSuggestion(this.yourCallBackFunctionHere); // Suggested route will be updated
-//              // Display UI waiting screen
-//              console.log(this.stopStorage.getStart());
-//              console.log(this.stopStorage.getDestination());
-
-                this.stopStorage.getAllStops();
-            }} title="Generate Route" style={styles.generateButton} color='#FF0000'/>
+            <TouchableOpacity
+              style={styles.generateButton}
+              onPress={() => {this.stopStorage.getAllStops();}}
+              underlayColor='#fff'>
+              <Text style={styles.generateButtonText}> Generate Route</Text>
+            </TouchableOpacity>
           </View>
         );
     }
@@ -240,18 +247,33 @@ const styles = StyleSheet.create({
         color: '#656565'
       },
       container: {
-        marginTop: -18,
+        marginTop: 10,
         marginLeft: 20,
         marginRight: 20,
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 6,
-        height:300,
+        height: 300,
       },
       addStopButton:{
       },
       generateButton:{
-
+        marginRight:100,
+        marginLeft:100,
+        paddingTop: 15,
+        paddingBottom: 15,
+        backgroundColor:'#FF5E5E',
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: '#fff',
+      },
+      generateButtonText:{
+        color:'#fff',
+        fontSize: 17,
+        fontWeight: 'bold',
+        textAlign:'center',
+        paddingLeft : 10,
+        paddingRight : 10
       },
       flowRight: {
         flexDirection: 'row',
@@ -270,7 +292,6 @@ const styles = StyleSheet.create({
         // shadowOffset: { width: 2, height: 5 },
         // shadowOpacity: 0.2,
         // shadowRadius: 2,
-        height:250,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
@@ -280,7 +301,7 @@ const styles = StyleSheet.create({
       },
       planningBoardInput: {
         marginLeft: 20,
-        marginRight: 20,
+        marginBottom: 20,
         flex: 3
       },
       planningBoardButton: {
