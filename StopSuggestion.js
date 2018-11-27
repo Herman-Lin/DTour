@@ -3,6 +3,7 @@
 import React from 'react';
 import AddStopPage from './AddStopPage'
 import { StopStorage } from './StopStorage'
+import { RouteBoxer } from './RouteBoxer'
 
 
 export class StopSuggestion	{
@@ -55,7 +56,7 @@ export class StopSuggestion	{
 		return locations;
 	}
 
-/*
+
 	
 // needs RouteBoxer to run
 var directionService = new google.maps.DirectionsService();
@@ -82,7 +83,7 @@ var type = "gas";
 	
 console.log(stopArray);
 
-*/
+
 	
 	
 
