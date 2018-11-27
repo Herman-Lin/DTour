@@ -19,6 +19,8 @@ import LocationSuggestion from './components/LocationSuggestion';
 import { createStackNavigator } from 'react-navigation';
 
 import LocationList from './components/LocationList';
+import Polyline from '@mapbox/polyline';
+
 
 export default class SearchPage extends Component{
     constructor(props) {
@@ -29,8 +31,14 @@ export default class SearchPage extends Component{
         textValue: 'JSON response will be shown',
         results: [],
         addressSuggestions: [],
-        userLocation: null,
+        userLocation: null,//{latitude: 34.0689, longitude: -118.445},
+        userDestination: null,
+        coords: [],
+        concat: null,
+        
       };
+
+      this.mergeLot = this.mergeLot.bind(this);
     }
 
     // /**
@@ -120,20 +128,62 @@ export default class SearchPage extends Component{
           userDestination: {
             latitude: 35.0000,
             longitude: -119.000,
-            latitudeDelta: 0.0622,
-            longitudeDelta: 0.0421,
+            //latitudeDelta: 0.0622,
+            //longitudeDelta: 0.0421,
           }
         });
+        this.mergeLot();
       }, err => console.log(err));
     }
 
+
+    mergeLot(){
+      if (this.state.userLocation.latitude != null && this.state.userLocation.longitude!=null)
+       {
+         let concatLot = this.state.userLocation.latitude +","+ this.state.userLocation.longitude
+        console.log(concatLot)
+         this.setState({
+           concat: concatLot
+         }, () => {
+           this.getDirections(concatLot, "34.0679,-118.555");
+         });
+       }
+  
+     }
+
+  
+  async getDirections(startLoc, destinationLoc) {
+    console.log(startLoc, destinationLoc)
+    try {
+      //let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }`)
+      console.log(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
+      let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
+      let respJson = await resp.json();
+      console.log(respJson);
+      let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
+      let coords = points.map((point, index) => {
+          return  {
+              latitude : point[0],
+              longitude : point[1]
+          }
+      })
+
+      console.log(coords)
+      this.setState({coords: coords})
+      return coords
+    } catch(error) {
+      alert(error)
+      return error
+   }
+  }
+    
     render(){
 
         console.log(this.state.routeSuggestions);
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination}/>
+              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords}/>
             </View>        
             <View style={styles.flowRight}>
               <TextInput
