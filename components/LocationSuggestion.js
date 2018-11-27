@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text, Image, Button, StyleSheet} from 'react-native';
+import {View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-native';
 
-class LocationSuggestion extends React.Component {  
+class LocationSuggestion extends React.Component {
     render() {
         let addStop = this.props.addStop;
         let resultJson = this.props.suggestion_json;
@@ -16,7 +16,10 @@ class LocationSuggestion extends React.Component {
                     <Text>{this.props.display_address}</Text>
                 </View>
                 <View style={{flexDirection: 'column', width: 50, marginTop: 30, marginRight: 5}}>
-                    <Button onPress={()=>addStop(resultJson)} title="Add"/>
+                    <TouchableOpacity style={styles.addStopButton} onPress={()=>addStop(resultJson)}>
+                      <Text style={styles.addStopButtonText}>Add</Text>
+                    </TouchableOpacity>
+
                 </View>
             </View>
         )
@@ -33,6 +36,16 @@ const styles = StyleSheet.create({
     height: 120,
     borderTopWidth: 1,
     borderColor: '#555555',
+  },
+  addStopButton: {
+    backgroundColor: '#FF5E5E',
+    paddingTop: 5,
+    paddingBottom: 5,
+    borderRadius: 5,
+  },
+  addStopButtonText: {
+    textAlign:'center',
+    color: 'white',
   }
 });
 export default LocationSuggestion

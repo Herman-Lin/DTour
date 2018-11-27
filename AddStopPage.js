@@ -220,7 +220,9 @@ export default class AddStopPage extends Component{
                 placeholder='Destination'/>
               </View>
               <View style={styles.planningBoardButton}>
-                <Button title="+" style={styles.addStopButton} color='black'/>
+                <TouchableOpacity style={styles.addStopButton}>
+                  <Text style={styles.addStopButtonText}>+</Text>
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.container}>
@@ -253,19 +255,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 6,
-        height: 300,
+        height: 400,
       },
       addStopButton:{
       },
+      addStopButtonText:{
+        textAlign:'center',
+        color: 'black',
+        fontSize: 25,
+      },
       generateButton:{
-        marginRight:100,
-        marginLeft:100,
+        marginTop: 540,
+        marginLeft: 115,
         paddingTop: 15,
         paddingBottom: 15,
         backgroundColor:'#FF5E5E',
         borderRadius: 15,
-        borderWidth: 1,
-        borderColor: '#fff',
+        position: 'absolute',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 3,
       },
       generateButtonText:{
         color:'#fff',
@@ -273,7 +282,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign:'center',
         paddingLeft : 10,
-        paddingRight : 10
+        paddingRight : 10,
       },
       flowRight: {
         flexDirection: 'row',
@@ -305,7 +314,7 @@ const styles = StyleSheet.create({
         flex: 3
       },
       planningBoardButton: {
-        marginTop: 6,
+        marginTop: 9,
         marginLeft: 15,
         marginRight: 5
       },
