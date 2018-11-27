@@ -18,6 +18,7 @@ import {StopStorage} from './StopStorage';
 import LocationSuggestion from './components/LocationSuggestion';
 
 import LocationList from './components/LocationList';
+import StopSearchList from './components/StopSearchList';
 
 export default class AddStopPage extends Component{
     constructor(props) {
@@ -41,6 +42,7 @@ export default class AddStopPage extends Component{
         currentSearchResult: null,
         currentStops: [], //help for deletion later, holds json of stops
         stopSearchStrings: [], // holds the search strings for stops
+        stopList: [{}],
       };
 
     }
@@ -118,14 +120,23 @@ export default class AddStopPage extends Component{
       console.log(this.state.routeSuggestions);
     };
 
-    _onSearchTextChanged2 = (event) => {
-      this.state.stopSearchStrings[0] = event.nativeEvent.text;
+    _onSearchTextChanged2 = (index, event) => {
+      if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] === "")
+        this.state.stopSearchStrings[index] = event.nativeEvent.text;
+      else {
+        this.setState({
+          stopSearchStrings: this.state.stopSearchStrings.map((val, _index) => {
+            if (_index === index) return event.nativeEvent.text;
+            else return val;
+          }),
+        });
+      }
     };
 
-    _onSearchPressed2 = () => {
-      if (this.state.stopSearchStrings[0] === undefined || this.state.stopSearchStrings[0] == "") return;
-      this.yelp_search(this.state.stopSearchStrings[0], +34.06893, -118.445127);
-      this.setState({ isLoading: true, currentSearch: 0 }); // 0, 1, ... used for index in stopSearchStrings array
+    _onSearchPressed2 = (index) => {
+      if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
+      this.yelp_search(this.state.stopSearchStrings[index], +34.06893, -118.445127);
+      this.setState({ isLoading: true, currentSearch: index }); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
@@ -171,6 +182,19 @@ export default class AddStopPage extends Component{
         }
     }
 
+    addStopSearchBar = (e) => {
+      this.setState((prevState) => ({
+        stopList: [...prevState.stopList, {}],
+      }));
+    }
+
+    removeStop = (index) => {
+      this.setState(state => {
+        stopList: this.state.stopList.filter((item, _index1) => index !== _index1);
+        stopSearchStrings: this.state.stopList.filter((val, _index2) => index !== _index2);
+      });
+    }
+
     //             <Button onPress={() => {
     //               // Example of using stopStorage
     // //              var yelpJsonReturnString = '{"coordinates": {"latitude":34.069872,"longitude":-118.453163}}';
@@ -206,12 +230,11 @@ export default class AddStopPage extends Component{
                 onSubmitEditing={this._onSearchPressed1}
                 onChange={this._onSearchTextChanged1}
                 placeholder='Current Location'/>
-              <TextInput
-                style={styles.searchInput}
-                value={this.state.stopSearchStrings[0]}
-                onSubmitEditing={this._onSearchPressed2}
-                onChange={this._onSearchTextChanged2}
-                placeholder='Add a Stop'/>
+              <StopSearchList stops={this.state.stopList}
+                              searchString={this.state.stopSearchStrings}
+                              changeFunc={this._onSearchTextChanged2}
+                              submitFunc={this._onSearchPressed2}
+                              removeFunc={this.removeStop}/>
               <TextInput autoFocus
                 style={styles.searchInput}
                 value={this.state.destSearchString}
@@ -220,7 +243,9 @@ export default class AddStopPage extends Component{
                 placeholder='Destination'/>
               </View>
               <View style={styles.planningBoardButton}>
-                <TouchableOpacity style={styles.addStopButton}>
+                <TouchableOpacity
+                  style={styles.addStopButton}
+                  onPress={this.addStopSearchBar}>
                   <Text style={styles.addStopButtonText}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -266,7 +291,8 @@ const styles = StyleSheet.create({
       },
       generateButton:{
         marginTop: 540,
-        marginLeft: 115,
+        // marginLeft: 115,
+        marginLeft: '27%',
         paddingTop: 15,
         paddingBottom: 15,
         backgroundColor:'#FF5E5E',
