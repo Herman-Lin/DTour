@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import {View, StyleSheet} from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
+
 
 
 //Component used to show map
@@ -191,15 +192,21 @@ mapStyle = [
       ]
     }
   ]
+
+
 const usersMap = props => {
     let userLocationMarker = null;
     let userDestinationMarker  = null;
-    let route = null;
+    let routePolyline = null;
+    let wayPointMarkers = null;
+    let displayRoute = 0;
+  
 
     this.state = {
-        markers : [],
+        markers : props.wayPoints,
         coords: props.coordinates,
         destinationLatLong: null,
+        displayRoute: 0,
     };
 
     if (props.userLocation) {
@@ -211,6 +218,25 @@ const usersMap = props => {
        
     }
 
+    if (props.displayRoute == 1) {   //display route only once trip has been planned. Initially app has no route displayed.
+        displayRoute = 1;
+        routePolyline = <Polyline coordinates={this.state.coords} strokeColor="#FF5E5E" strokeWidth={4} />
+    }
+
+    if (props.wayPoints) {
+      
+
+      //allows for rendering of multiple markers
+      wayPointMarkers = this.state.markers.map(marker => (
+        <MapView.Marker 
+          coordinate={marker}
+          
+        />
+      ))
+        
+        //wayPointMarkers = <MapView.Marker coordinate={this.state.markers} pinColor="red" />
+    }
+
    
    
     console.log(props.coordinates)
@@ -218,14 +244,7 @@ const usersMap = props => {
      //   coords: props.coordinates
     //});
 
-   // if (this.state.markers.length != 0){ //if we have stops to mark
-    //    stopMarker = <MapView.Marker 
-     //       coordinate={{
-      //          longitude: marker.longitude,
-     //           latitude: marker.latitude
-     //       }}
-     //   />
-   //}
+  
 
     
    //{this.state.markers.map(marker =>(
@@ -248,16 +267,10 @@ const usersMap = props => {
                 
                 
              
-               
-               
-                <Polyline 
-                    coordinates={this.state.coords}
-                            
-                    strokeColor="#FF5E5E"
-                    
-                    strokeWidth={6}
-                />
-
+                
+               {routePolyline}
+                
+                {wayPointMarkers}
                 {userLocationMarker}
                 {userDestinationMarker}
 

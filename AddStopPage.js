@@ -20,6 +20,8 @@ import LocationSuggestion from './components/LocationSuggestion';
 import LocationList from './components/LocationList';
 import StopSearchList from './components/StopSearchList';
 
+global.stopStorage = new StopStorage();
+
 export default class AddStopPage extends Component{
     constructor(props) {
       super(props);

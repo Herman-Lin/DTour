@@ -35,84 +35,15 @@ export default class SearchPage extends Component{
         userDestination: null,
         coords: [],
         concat: null,
+        displayRoute: 0,
+
+        dummyValues: [{latitude: 34.0689, longitude: -118.455},
+          {latitude: 34.0689, longitude: -118.430}],
         
       };
 
       this.mergeLot = this.mergeLot.bind(this);
     }
-
-    // /**
-    //  * Given an address, change addressSuggestion in state to corresponding array of {address, ID}
-    //  * @param {string} address Incomplete search terms
-    //  */
-    // address_search = (address) => {
-    //   const Http = new XMLHttpRequest();
-    //   var url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + encodeURIComponent(address) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M&location=" + String(this.state.latitude) + "," + String(this.state.longitude);
-    //   Http.open("GET", url);
-    //   Http.send();
-    //   Http.onreadystatechange = e => {
-    //     if (Http.readyState == 4 && Http.status == 200) {
-    //       let response = JSON.parse(Http.responseText);
-    //       var suggestions = [];
-    //       response["predictions"].forEach(function (prediction) {
-    //         result.push({"Address": prediction['description'], "ID": prediction['place_id']});
-    //       });
-    //       this.setState(
-    //         {addressSuggestions: suggestions}
-    //       );
-    //     }
-    //   };
-    // };
-
-    // yelp_search = (search_str, latitude, longitude) => {
-    //   const Http = new XMLHttpRequest();
-    //   var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(search_str) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude);
-    //   Http.open("GET", url);
-    //   Http.setRequestHeader('Authorization', 'Bearer ' + 'ngBHhApCaTwA0HfEvloYx0N57iWuE3TW1OkKRZ74PKbfDyZBThUWZHemHJ3LeltzP6NQ1dP3leLIepkqVxIkUX7R5xjNBo4vznjOZuOZVFMbgCWWEyxrZHuNNujUW3Yx');
-    //   Http.send();
-    //   Http.onreadystatechange = (e) => {
-    //     if (Http.readyState == 4 && Http.status == 200) {
-    //       var response = JSON.parse(Http.responseText)
-
-    //       var result = [];
-          
-    //       response['businesses'].forEach(function (business) {
-    //         var result_json = {
-    //           "name": business['name'],
-    //           "image_url": business['image_url'],
-    //           "is_closed": business['is_closed'],
-    //           "review_count": business['review_count'],
-    //           "categories": business['categories'],
-    //           "rating": business['rating'],
-    //           "coordinates": business['coordinates'],
-    //           "price": business['price'],
-    //           "location": business['location'],
-    //         }
-    //         result.push(result_json)
-    //       });
-
-    //       this.setState({
-    //         isLoading: false,
-    //         textValue: JSON.stringify(result),
-    //         results: result
-    //       });
-    //     }
-    //   }
-    // }
-
-    // _onSearchTextChanged = (event) => {
-    //   //console.log('_onSearchTextChanged');
-    //   this.setState({ searchString: event.nativeEvent.text });
-    //   //console.log('Current: '+this.state.searchString+', Next: '+event.nativeEvent.text);
-    // };
-
-    // _onSearchPressed = () => {
-    //   if (this.state.searchString === undefined || this.state.searchString == "") return;
-    //   this.yelp_search(this.state.searchString, +34.06893, -118.445127);
-    //   this.setState({ isLoading: true });
-    //   console.log(this.state.routeSuggestions);
-    // };
-
 
 
     getUserLocationHandler = () => {
@@ -133,6 +64,7 @@ export default class SearchPage extends Component{
           }
         });
         this.mergeLot();
+       // this.checkRoute();
       }, err => console.log(err));
     }
 
@@ -155,8 +87,7 @@ export default class SearchPage extends Component{
   async getDirections(startLoc, destinationLoc) {
     console.log(startLoc, destinationLoc)
     try {
-      //let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }`)
-      console.log(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
+
       let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
       let respJson = await resp.json();
       console.log(respJson);
@@ -176,14 +107,19 @@ export default class SearchPage extends Component{
       return error
    }
   }
+
+
+    checkRoute(){
+      console.log(stopStorage.getDestination())
+    }
     
     render(){
 
-        console.log(this.state.routeSuggestions);
+        
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords}/>
+              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords} displayRoute={this.state.displayRoute} wayPoints={this.state.dummyValues}/>
             </View>        
             <View style={styles.flowRight}>
               <TextInput
