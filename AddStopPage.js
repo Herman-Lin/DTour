@@ -230,6 +230,10 @@ export default class AddStopPage extends Component{
     }
 
     removeStop = (index) => {
+      if(this.state.currentStops[index]){
+        this.stopStorage.deleteStopByJSON(this.state.currentStops[index]);
+      }
+
       this.setState({
         stopList: this.state.stopList.filter((item, _index1) => index !== _index1),
         stopSearchStrings: this.state.stopSearchStrings.filter((val, _index2) => index !== _index2)
