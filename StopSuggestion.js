@@ -59,7 +59,8 @@ export class StopSuggestion	{
    * @param {string} type type of stop user wants to visit
    */
 	generate_stops = (stops, stopType) => {
-		var locations = [];
+		// set to remove dupes
+		var locationSet = new Set();
 		var key = "AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
 		var radius = 180;
 		var overlap = 110;
@@ -84,21 +85,22 @@ export class StopSuggestion	{
 					for (let j = 1; j < iterations; j++)	{
 						// for each substop, make a yelp request
 						let searchResult = yelp_request(stopType, stops[i-1].latitude + latDiff, stops[i-1].longitude + longDiff, radius);
-						locations.push(searchResult);
+						locationSet.add(searchResult);
 					}
 				}
 			};	
 		}
-		console.log(locations)
+		var locations = Array.from(locationSet);
+		//console.log(locations)
 		return locations[];
 	}
 	
+	//
 	yelp_request = (stopType, latitude, longitude, radius) => {
       const Http = new XMLHttpRequest();
 	  var result = [];
       var yelpURL = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(stopType) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude) + "&radius=" + String(radius) + "&sort_by=distance";
       Http.open("GET", yelpURL);
-	  // herman's api key
       Http.setRequestHeader('Authorization', 'Bearer ' + 'crhXlVpb7fS-f0kxhgFDr8ja2OjrWsopyviJeJQUdfON39GlVobMcQ6fuiZsApWiBRVq_SiiCw4cSvAy-5-abf09fZ42N3MpM5zvEavR3GkJ2ep3XbCd5-eMe6L_W3Yx');
       Http.send();
       Http.onreadystatechange = (e) => {
@@ -122,34 +124,6 @@ export class StopSuggestion	{
       }
 	  return result[];
     }
-
-
-	
-/* // needs RouteBoxer to run
-var directionService = new google.maps.DirectionsService();
-var rboxer = new RouteBoxer();
-var distance = 15*1.6; // in miles 
-var stopArray = [];
-var yelp = new AddStopPage();
-var type = "gas";
-
-	directionService.route(request, function(result, status) {
-	  if (status == google.maps.DirectionsStatus.OK) {
-
-		var path = result.routes[0].overview_path;
-		var boxes = routeBoxer.box(path, distance);
-
-		for (var i = 0; i < boxes.length; i++) {
-		  var bounds = box[i];
-		  var stop = bounds.getCenter();
-		  yelp.yelp_search(type, stop.lat(), stop.long());
-		  stopArray.push(yelp.state.results);
-		}
-	  }
-	});
-	
-console.log(stopArray);
- */
 
 	
 	
