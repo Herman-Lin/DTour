@@ -1,9 +1,6 @@
 'use strict'
 
 import React, { Component } from 'react';
-import  AddStopPage  from './AddStopPage'
-//import { StopStorage } from './StopStorage'
-//import { RouteBoxer } from './RouteBoxer'
 
 export class StopSuggestion	{
 	
@@ -62,30 +59,69 @@ export class StopSuggestion	{
    * @param {string} type type of stop user wants to visit
    */
 	generate_stops = (stops, stopType) => {
-		try {
-			var addStop = new AddStopPage(this.props);
-			var locations = [];
-			//var lats = 37.4220;
-			//var longs = -122.0840;
-			for (let i = 0; i < stops.length; i = i++)	{
-				//console.log(i)
-				if (stops[i] != null)	{
-					//console.log("wtf" + stops[i].latitude)
-					addStop.yelp_search(stopType, stops[i].latitude, stops[i].longitude);
-					//while (addStop.state.isLoading == true)	{
-						//addStop.yelp_search("in n out", stops[i].latitude, stops[i].longitude)	
-					//}
-					//yelp.setState({ isLoading: true});
-					locations.push(addStop.state.results);
+		var locations = [];
+		var key = "AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
+		var radius = 180;
+		var overlap = 110;
+		// how far each search substop will be spaced apart
+		var factor = 2 * radius - overlap; 
+        const Http = new XMLHttpRequest();
+		// for all stops, find substops and do yelp search for all of them
+		for (let i = 1; i < stops.length; i++)	{
+			// find the distance between each pair of stops, and calculate how many times to search on this section
+			let mapURL = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="+ String(stops[i-1].latitude) + "," + String(stops[i-1].longitude) + "&destinations=" + String(stops[i].latitude) + "," + String(stops[i].longitude) +"&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
+			Http.open("GET", url);
+			Http.send();
+			Http.onreadystatechange = e => {
+				if (Http.readyState == 4 && Http.status == 200) {
+					let response = JSON.parse(Http.responseText);
+					// distance between the stops divided by the factor = how many times we will call yelp search on this section (# of substops)
+					let iterations = response.rows[0].elements[0].distance.value/factor;
+					// latitude difference/# of substops
+					let latDiff = (stops[i].latitude - stops[i-1].latitude)/iterations;
+					// longitude difference/# of substops
+					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;				  
+					for (let j = 1; j < iterations; j++)	{
+						// for each substop, make a yelp request
+						let searchResult = yelp_request(stopType, stops[i-1].latitude + latDiff, stops[i-1].longitude + longDiff, radius);
+						locations.push(searchResult);
+					}
 				}
-			}
-			console.log(locations)
-			return locations;
-		} catch (error)	{
-		  alert(error)
-		  return error;	
+			};	
 		}
+		console.log(locations)
+		return locations[];
 	}
+	
+	yelp_request = (stopType, latitude, longitude, radius) => {
+      const Http = new XMLHttpRequest();
+	  var result = [];
+      var yelpURL = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(stopType) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude) + "&radius=" + String(radius) + "&sort_by=distance";
+      Http.open("GET", yelpURL);
+	  // herman's api key
+      Http.setRequestHeader('Authorization', 'Bearer ' + 'crhXlVpb7fS-f0kxhgFDr8ja2OjrWsopyviJeJQUdfON39GlVobMcQ6fuiZsApWiBRVq_SiiCw4cSvAy-5-abf09fZ42N3MpM5zvEavR3GkJ2ep3XbCd5-eMe6L_W3Yx');
+      Http.send();
+      Http.onreadystatechange = (e) => {
+        if (Http.readyState == 4 && Http.status == 200) {
+          var response = JSON.parse(Http.responseText)
+          response['businesses'].forEach(function (business) {
+            var result_json = {
+              "name": business['name'],
+              "image_url": business['image_url'],
+              "is_closed": business['is_closed'],
+              "review_count": business['review_count'],
+              "categories": business['categories'],
+              "rating": business['rating'],
+              "coordinates": business['coordinates'],
+              "price": business['price'],
+              "location": business['location'],
+            }
+            result.push(result_json)
+          });
+        }
+      }
+	  return result[];
+    }
 
 
 	
