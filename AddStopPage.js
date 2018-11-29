@@ -25,7 +25,7 @@ global.stopStorage = new StopStorage();
 export default class AddStopPage extends Component{
     constructor(props) {
       super(props);
-      this.stopStorage = new StopStorage();
+      //this.stopStorage = new StopStorage();
       this.getUserLocationHandler();
 
       // Below are examples of how to use stopStorage interface:
@@ -97,7 +97,7 @@ export default class AddStopPage extends Component{
                 longitude: response.result.geometry.location.lng
             }
         })
-        this.stopStorage.setStart(this.state.addressResult.coordinates.latitude, this.state.addressResult.coordinates.longitude);
+        global.stopStorage.setStart(this.state.addressResult.coordinates.latitude, this.state.addressResult.coordinates.longitude);
 
       }
     };
@@ -107,7 +107,7 @@ export default class AddStopPage extends Component{
       const Http = new XMLHttpRequest();
       var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(search_str) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude);
       Http.open("GET", url);
-      Http.setRequestHeader('Authorization', 'Bearer ' + 'ngBHhApCaTwA0HfEvloYx0N57iWuE3TW1OkKRZ74PKbfDyZBThUWZHemHJ3LeltzP6NQ1dP3leLIepkqVxIkUX7R5xjNBo4vznjOZuOZVFMbgCWWEyxrZHuNNujUW3Yx');
+      Http.setRequestHeader('Authorization', 'Bearer ' + 'nMpM6dLuTMoyzu4q1dCBJPsSSSjqZ9UP7pTrRLbR5PSNni3wcHhZWKbAHRxYRhoosUdTkvmP5-D4HtAUbNLNXyensvOMaUw5nS_raYiV1raMvDNO5_t0-hF7GJH_W3Yx');
       Http.send();
       Http.onreadystatechange = (e) => {
         if (Http.readyState == 4 && Http.status == 200) {
@@ -199,7 +199,7 @@ export default class AddStopPage extends Component{
             longitude: position.coords.longitude,
           }
         });
-       this.stopStorage.setStart(this.state.startLocation.latitude, this.state.startLocation.longitude);
+       global.stopStorage.setStart(this.state.startLocation.latitude, this.state.startLocation.longitude);
       }, err => console.log(err));
     }
 
@@ -212,12 +212,12 @@ export default class AddStopPage extends Component{
         }
         else if(this.state.currentSearch === -2){ //destination
             this.state.destSearchString = result.name;
-            this.stopStorage.setDestination(r);
+            global.stopStorage.setDestination(r);
         }
         else{ // stops
             this.state.stopSearchStrings[this.state.currentSearch] = result.name;
             this.state.currentStops[this.state.currentSearch] = r;
-            this.stopStorage.addStop(r);
+            global.stopStorage.addStop(r);
         }
     }
 
@@ -231,7 +231,7 @@ export default class AddStopPage extends Component{
 
     removeStop = (index) => {
       if(this.state.currentStops[index]){
-        this.stopStorage.deleteStopByJSON(this.state.currentStops[index]);
+        global.stopStorage.deleteStopByJSON(this.state.currentStops[index]);
       }
 
       this.setState({
@@ -305,7 +305,9 @@ export default class AddStopPage extends Component{
             </View>
             <TouchableOpacity
               style={styles.generateButton}
-              onPress={() => {this.stopStorage.getAllStops();}}
+              onPress={() => {global.stopStorage.getAllStops();
+                this.props.navigation.navigate('RouteMap');
+              }}
               underlayColor='#fff'>
               <Text style={styles.generateButtonText}> Generate Route</Text>
             </TouchableOpacity>

@@ -3,6 +3,7 @@ import { Platform, StyleSheet, Text, View, Button } from 'react-native';
 import{ createStackNavigator } from 'react-navigation';
 import SearchPage from './SearchPage';
 import AddStopPage from './AddStopPage';
+import RouteMapPage from './RouteMapPage';
 import FetchLocation from './components/FetchLocation';
 
 const App = createStackNavigator(
@@ -18,7 +19,14 @@ const App = createStackNavigator(
       navigationOptions: () => ({
         title: `Route Planning`,
       })
+    },
+    RouteMap: {
+      screen: RouteMapPage,
+      navigationOptions: () => ({
+        header:null
+      })
     }
+
   },
   {
     initialRouteName: 'Home'
