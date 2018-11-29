@@ -1,10 +1,9 @@
 'use strict'
 
-import React from 'react';
-import AddStopPage from './AddStopPage'
-import { StopStorage } from './StopStorage'
-import { RouteBoxer } from './RouteBoxer'
-
+import React, { Component } from 'react';
+import  AddStopPage  from './AddStopPage'
+//import { StopStorage } from './StopStorage'
+//import { RouteBoxer } from './RouteBoxer'
 
 export class StopSuggestion	{
 	
@@ -42,6 +41,7 @@ export class StopSuggestion	{
    * @param {string} type type of stop user wants to visit
    */
 	basic_stop_search = (origLat, origLong, destLat, destLong, type) => {
+		var SP = SearchPage();
 		var latDiff = destLat - origLat;
 		var longDiff = destLong - origLong;
 		var locations = [];
@@ -55,10 +55,41 @@ export class StopSuggestion	{
 		}
 		return locations;
 	}
+	
+	/**
+   * For each stop, generate potential places that can be visited
+   * @param {array} Array of coords of stops
+   * @param {string} type type of stop user wants to visit
+   */
+	generate_stops = (stops, stopType) => {
+		try {
+			var addStop = new AddStopPage(this.props);
+			var locations = [];
+			//var lats = 37.4220;
+			//var longs = -122.0840;
+			for (let i = 0; i < stops.length; i = i++)	{
+				//console.log(i)
+				if (stops[i] != null)	{
+					//console.log("wtf" + stops[i].latitude)
+					addStop.yelp_search(stopType, stops[i].latitude, stops[i].longitude);
+					//while (addStop.state.isLoading == true)	{
+						//addStop.yelp_search("in n out", stops[i].latitude, stops[i].longitude)	
+					//}
+					//yelp.setState({ isLoading: true});
+					locations.push(addStop.state.results);
+				}
+			}
+			console.log(locations)
+			return locations;
+		} catch (error)	{
+		  alert(error)
+		  return error;	
+		}
+	}
 
 
 	
-// needs RouteBoxer to run
+/* // needs RouteBoxer to run
 var directionService = new google.maps.DirectionsService();
 var rboxer = new RouteBoxer();
 var distance = 15*1.6; // in miles 
@@ -82,7 +113,7 @@ var type = "gas";
 	});
 	
 console.log(stopArray);
-
+ */
 
 	
 	
