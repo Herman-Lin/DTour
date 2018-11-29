@@ -209,9 +209,9 @@ const usersMap = props => {
         displayRoute: 0,
     };
 
-    if (props.userLocation) {
-        userLocationMarker = <MapView.Marker coordinate={props.userLocation} pinColor="gold" />
-    }
+    //if (props.userLocation) {
+    //    userLocationMarker = <MapView.Marker coordinate={props.userLocation} pinColor="gold" />
+    //}
 
     if (props.destinationLocation) {
         userDestinationMarker = <MapView.Marker coordinate={props.destinationLocation} />;
@@ -261,6 +261,9 @@ const usersMap = props => {
                   }}
                 region={props.userLocation}
                 
+                showsUserLocation={true}
+                followsUserLocation={true}
+                showsMyLocationButton={true}
                 style={styles.map}
                 customMapStyle={mapStyle}
                 > 

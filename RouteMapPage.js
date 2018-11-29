@@ -11,6 +11,7 @@ import{
     Image,
     TouchableOpacity,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 
 import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
@@ -18,31 +19,39 @@ import { StopStorage } from './StopStorage';
 import LocationSuggestion from './components/LocationSuggestion';
 import { createStackNavigator } from 'react-navigation';
 
-
 import LocationList from './components/LocationList';
+import AddStopPage from './AddStopPage';
+
 import Polyline from '@mapbox/polyline';
 
 
-export default class SearchPage extends Component{
+export default class RouteMapPage extends Component{
     constructor(props) {
       super(props);
       this.getUserLocationHandler(); //get user location at startup
       this.state = {
+        
         isLoading: false,
-        textValue: 'JSON response will be shown',
+     
         results: [],
         addressSuggestions: [],
         userLocation: null,//{latitude: 34.0689, longitude: -118.445},
+        destination: null,
         userDestination: null,
+        startLocation: null,
         coords: [],
         concat: null,
-        displayRoute: 0,
+        displayRoute: 1,
 
+        dummyDestination: "34.0679,-118.555",
         dummyValues: [{latitude: 34.0689, longitude: -118.455},
           {latitude: 34.0689, longitude: -118.430}],
+
+        suggestions: null,
+        suggestionsPolyline: null,
         
       };
-
+      this.getSuggestionCallback = this.getSuggestionCallback.bind(this);
       this.mergeLot = this.mergeLot.bind(this);
     }
 
@@ -64,13 +73,77 @@ export default class SearchPage extends Component{
             //longitudeDelta: 0.0421,
           }
         });
-        this.mergeLot();
+        
+        if (this.state.displayRoute == 1){
+          this.mergeLot();
+        }
        // this.checkRoute();
       }, err => console.log(err));
     }
 
 
+    getSuggestionCallback(suggestions) {
+      
+        console.log(suggestions);
+      this.setState({
+        suggestions: suggestions,
+        suggestionsPolyline: suggestions[0].polyline,
+      });
+
+      let points = Polyline.decode(suggestions[0].polyline);
+      
+      let coords = points.map((point, index) => {
+          return  {
+              latitude : point[0],
+              longitude : point[1]
+          }
+      })
+
+      this.setState({
+        coords: coords,
+      })
+
+      let stops = suggestions[0].coordinates;
+      
+     
+      let wayPoints = stops.map((point, index) => {
+          return{
+            latitude: point.getLatitude(),
+            longitude: point.getLongitude(),
+
+          }
+      })
+      
+      this.setState({
+        wayPoints: wayPoints,
+      })
+      console.log(suggestions[0])
+
+
+
+      
+    }
+
     mergeLot(){
+      let start = global.stopStorage.getStart();
+      let destination = global.stopStorage.getDestination();
+      let suggestions = []
+      global.stopStorage.getSuggestion(this.getSuggestionCallback);
+
+      console.log(start, destination);
+
+
+      /*
+      
+      if (start != null && destination != null) {
+        this.setState(
+          {
+            startLocation: {start},
+            destination: {destination},  
+          }
+        )
+      }
+
       if (this.state.userLocation.latitude != null && this.state.userLocation.longitude!=null)
        {
          let concatLot = this.state.userLocation.latitude +","+ this.state.userLocation.longitude
@@ -78,18 +151,25 @@ export default class SearchPage extends Component{
          this.setState({
            concat: concatLot
          }, () => {
-           this.getDirections(concatLot, "34.0679,-118.555");
+           console.log(this.state.dummyDestination)
+           this.getDirections(concatLot, this.state.dummyDestination, this.state.dummyValues);
          });
        }
-  
+  */
      }
 
   
-  async getDirections(startLoc, destinationLoc) {
+  async getDirections(startLoc, destinationLoc, wayPoints) {
     console.log(startLoc, destinationLoc)
     try {
+      let resp = null
+      if  (wayPoints){
+         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
 
-      let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
+      }
+      else {
+         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
+      }
       let respJson = await resp.json();
       console.log(respJson);
       let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
@@ -114,6 +194,11 @@ export default class SearchPage extends Component{
       console.log(stopStorage.getDestination())
     }
     
+    prepareRoute(){
+      let startLoc
+    }
+
+
     render(){
 
         
@@ -121,14 +206,20 @@ export default class SearchPage extends Component{
           <View>
             <View>
               <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords} displayRoute={this.state.displayRoute} wayPoints={this.state.wayPoints}/>
-            </View>        
-            <View style={styles.flowRight}>
-              <TextInput
-                style={styles.searchInput}
-                value={this.state.searchString}
-                onFocus={() => this.props.navigation.navigate('AddStop')}
-                placeholder='Where to?'/>
-            </View>  
+            </View> 
+                
+
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => {
+                      
+                      this.props.navigation.navigate('AddStop'); //navigate back to Home screen 
+                    }}
+                    underlayColor='#fff'>
+              <Icon name={"chevron-left"}  size={40} color="#fff" />
+                
+            </TouchableOpacity>
+            
           </View>
         );
     }
@@ -147,6 +238,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'stretch',
         zIndex: 100
+      },
+      
+      backButton:{
+        
+        marginTop: 30,
+        // marginLeft: 115,
+        marginLeft: '3%',
+        paddingTop: 5,
+        paddingBottom: 5,
+        backgroundColor:'#FF5E5E',
+        borderRadius: 100,
+        position: 'absolute',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 3,
+      },
+      backButtonText:{
+        color:'#fff',
+        fontSize: 17,
+        fontWeight: 'bold',
+        textAlign:'center',
+        paddingLeft : 10,
+        paddingRight : 10,
       },
       searchInput: {
         height: 50,
