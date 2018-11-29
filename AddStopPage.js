@@ -57,7 +57,7 @@ export default class AddStopPage extends Component{
      */
     address_search = (address) => {
       const Http = new XMLHttpRequest();
-      var url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + encodeURIComponent(address) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M&location=" + String(this.state.latitude) + "," + String(this.state.longitude);
+      var url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + encodeURIComponent(address) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M&location=" + String(this.state.userLocation.latitude) + "," + String(this.state.userLocation.longitude);
       Http.open("GET", url);
       Http.send();
       Http.onreadystatechange = e => {
@@ -65,7 +65,7 @@ export default class AddStopPage extends Component{
           let response = JSON.parse(Http.responseText);
           var suggestions = [];
           response["predictions"].forEach(function (prediction) {
-            result.push({"Address": prediction['description'], "ID": prediction['place_id']});
+            suggestions.push({"Address": prediction['description'], "ID": prediction['place_id']});
           });
           this.setState(
             {addressSuggestions: suggestions}
@@ -80,15 +80,25 @@ export default class AddStopPage extends Component{
     );
     var suggestionObj = JSON.parse(suggestion);
     const Http = new XMLHttpRequest();
-    var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + encodeURIComponent(suggestionObj.place_id) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M";
+    var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + encodeURIComponent(suggestionObj.ID) + "&key=AIzaSyAwnXWH-qrRpBWraATnVVyHxKYuRSZEQ8M";
     Http.open("GET", url);
     Http.send();
     Http.onreadystatechange = e => {
       if (Http.readyState == 4 && Http.status == 200) {
+        this.state.addressSuggestions=[];
+        this.state.startSearchString = suggestionObj.Address;
         let response = JSON.parse(Http.responseText);
         this.setState(
-          { addressResult: {"coordinates": {"latitude": response.geometry.location.lat, "longitude": response.geometry.location.lng}}}
+          { addressResult: {"coordinates": {"latitude": response.result.geometry.location.lat, "longitude": response.result.geometry.location.lng}}}
         );
+        this.setState({
+            startLocation:{
+                latitude: response.result.geometry.location.lat,
+                longitude: response.result.geometry.location.lng
+            }
+        })
+        this.stopStorage.setStart(this.state.addressResult.coordinates.latitude, this.state.addressResult.coordinates.longitude);
+
       }
     };
   };
@@ -129,17 +139,19 @@ export default class AddStopPage extends Component{
       }
     }
 
+
     _onSearchTextChanged1 = (event) => {
       //console.log('_onSearchTextChanged');
-      this.setState({ startSearchString: event.nativeEvent.text });
+      this.setState({ startSearchString: event.nativeEvent.text, currentSearch: -1 });
+      this.address_search(this.state.startSearchString);
       // console.log('Current: '+this.state.searchString+', Next: '+event.nativeEvent.text);
     };
 
     _onSearchPressed1 = () => {
       if (this.state.startSearchString === undefined || this.state.startSearchString == "") return;
-      this.yelp_search(this.state.startSearchString, +34.06893, -118.445127);
-      this.setState({ isLoading: true, currentSearch: -1 });
-      console.log(this.state.routeSuggestions);
+        this.setState({ isLoading: true, currentSearch: -1 });
+        this.address_search(this.state.startSearchString);
+        console.log(this.state.routeSuggestions);
     };
 
     _onSearchTextChanged2 = (index, event) => {
@@ -157,7 +169,7 @@ export default class AddStopPage extends Component{
 
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
-      this.yelp_search(this.state.stopSearchStrings[index], +34.06893, -118.445127);
+      this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
       this.setState({ isLoading: true, currentSearch: index }); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
@@ -168,7 +180,7 @@ export default class AddStopPage extends Component{
 
     _onSearchPressed3 = () => {
       if (this.state.destSearchString === undefined || this.state.destSearchString == "") return;
-      this.yelp_search(this.state.destSearchString, +34.06893, -118.445127);
+      this.yelp_search(this.state.destSearchString, this.state.startLocation.latitude, this.state.startLocation.longitude);
       this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
       console.log(this.state.routeSuggestions);
     };
@@ -181,8 +193,13 @@ export default class AddStopPage extends Component{
             longitude: position.coords.longitude,
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
+          },
+          startLocation:{
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
           }
         });
+       this.stopStorage.setStart(this.state.startLocation.latitude, this.state.startLocation.longitude);
       }, err => console.log(err));
     }
 
@@ -203,6 +220,8 @@ export default class AddStopPage extends Component{
             this.stopStorage.addStop(r);
         }
     }
+
+
 
     addStopSearchBar = (e) => {
       this.setState((prevState) => ({
@@ -274,7 +293,11 @@ export default class AddStopPage extends Component{
             </View>
             <View style={styles.container}>
                 {/*<Text>{this.state.textValue}</Text>*/}
-                <LocationList addStop={this.onAddStop} results={this.state.results}/>
+                <LocationList addStop={this.onAddStop} results={this.state.results}
+                    addressSuggestions={this.state.addressSuggestions}
+                    currentSearch={this.state.currentSearch}
+                    toCoord={this.address_suggestion_to_coord}
+                />
             </View>
             <TouchableOpacity
               style={styles.generateButton}
