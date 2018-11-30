@@ -53,11 +53,14 @@ export class StopSuggestion	{
 		return locations;
 	}
 	
-	/**
+
+	
+	/// 
+ 	/**
    * For each stop, generate potential places that can be visited
    * @param {array} Array of coords of stops
    * @param {string} type type of stop user wants to visit
-   */
+   *//*
 	generate_stops = (stops, stopType) => {
 		// set to remove dupes
 		var locationSet = new Set();
@@ -71,60 +74,135 @@ export class StopSuggestion	{
 		for (let i = 1; i < stops.length; i++)	{
 			// find the distance between each pair of stops, and calculate how many times to search on this section
 			let mapURL = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="+ String(stops[i-1].latitude) + "," + String(stops[i-1].longitude) + "&destinations=" + String(stops[i].latitude) + "," + String(stops[i].longitude) +"&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
-			Http.open("GET", url);
+			//console.log(mapURL)
+			Http.open("GET", mapURL);
 			Http.send();
 			Http.onreadystatechange = e => {
 				if (Http.readyState == 4 && Http.status == 200) {
 					let response = JSON.parse(Http.responseText);
 					// distance between the stops divided by the factor = how many times we will call yelp search on this section (# of substops)
-					let iterations = response.rows[0].elements[0].distance.value/factor;
+					let iterations = Math.round(response.rows[0].elements[0].distance.value/factor);
+					//console.log(iterations)
 					// latitude difference/# of substops
 					let latDiff = (stops[i].latitude - stops[i-1].latitude)/iterations;
 					// longitude difference/# of substops
 					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;				  
 					for (let j = 1; j < iterations; j++)	{
 						// for each substop, make a yelp request
-						let searchResult = yelp_request(stopType, stops[i-1].latitude + latDiff, stops[i-1].longitude + longDiff, radius);
+						let searchResult = this.yelp_request(stopType, stops[i-1].latitude + latDiff, stops[i-1].longitude + longDiff, radius);
 						locationSet.add(searchResult);
 					}
 				}
 			};	
 		}
 		var locations = Array.from(locationSet);
-		//console.log(locations)
-		return locations[];
+		console.log("end")
+		return locations;
 	}
 	
 	//
 	yelp_request = (stopType, latitude, longitude, radius) => {
-      const Http = new XMLHttpRequest();
-	  var result = [];
-      var yelpURL = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(stopType) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude) + "&radius=" + String(radius) + "&sort_by=distance";
-      Http.open("GET", yelpURL);
-      Http.setRequestHeader('Authorization', 'Bearer ' + 'crhXlVpb7fS-f0kxhgFDr8ja2OjrWsopyviJeJQUdfON39GlVobMcQ6fuiZsApWiBRVq_SiiCw4cSvAy-5-abf09fZ42N3MpM5zvEavR3GkJ2ep3XbCd5-eMe6L_W3Yx');
-      Http.send();
-      Http.onreadystatechange = (e) => {
-        if (Http.readyState == 4 && Http.status == 200) {
-          var response = JSON.parse(Http.responseText)
-          response['businesses'].forEach(function (business) {
-            var result_json = {
-              "name": business['name'],
-              "image_url": business['image_url'],
-              "is_closed": business['is_closed'],
-              "review_count": business['review_count'],
-              "categories": business['categories'],
-              "rating": business['rating'],
-              "coordinates": business['coordinates'],
-              "price": business['price'],
-              "location": business['location'],
-            }
-            result.push(result_json)
-          });
-        }
-      }
-	  return result[];
-    }
-
+		const Http = new XMLHttpRequest();
+		var result = [];
+		var yelpURL = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(stopType) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude) + "&radius=" + String(radius);// + "&sort_by=distance";
+		console.log(yelpURL)
+		Http.open("GET", yelpURL);
+		Http.setRequestHeader('Authorization', 'Bearer ' + 'crhXlVpb7fS-f0kxhgFDr8ja2OjrWsopyviJeJQUdfON39GlVobMcQ6fuiZsApWiBRVq_SiiCw4cSvAy-5-abf09fZ42N3MpM5zvEavR3GkJ2ep3XbCd5-eMe6L_W3Yx');
+		Http.send();
+		Http.onreadystatechange = (e) => {
+			if (Http.readyState == 4 && Http.status == 200) {
+				var response = JSON.parse(Http.responseText)
+				console.log(response)
+				response['businesses'].forEach(function (business) {
+				var result_json = {
+				  "name": business['name'],
+				  "image_url": business['image_url'],
+				  "is_closed": business['is_closed'],
+				  "review_count": business['review_count'],
+				  "categories": business['categories'],
+				  "rating": business['rating'],
+				  "coordinates": business['coordinates'],
+				  "price": business['price'],
+				  "location": business['location'],
+				}
+				result.push(result_json)
+			  });
+			}
+		}
+	return result;
+	} */
+	
+	
+	////////////////////////NEW
+		/**
+   * For each stop, generate potential places that can be visited
+   * @param {array} Array of coords of stops
+   * @param {string} type type of stop user wants to visit
+   */
+	generate_stops = (callback, stops, stopType) => {
+		// set to remove dupes
+		var locationSet = new Set();
+		var key = "AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
+		var radius = 180;
+		var overlap = 110;
+		// how far each search substop will be spaced apart
+		var factor = 2 * radius - overlap; 
+        const Http = new XMLHttpRequest();
+		// for all stops, find substops and do yelp search for all of them
+		for (let i = 1; i < stops.length; i++)	{
+			// find the distance between each pair of stops, and calculate how many times to search on this section
+			let mapURL = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="+ String(stops[i-1].latitude) + "," + String(stops[i-1].longitude) + "&destinations=" + String(stops[i].latitude) + "," + String(stops[i].longitude) +"&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
+			//console.log(mapURL)
+			Http.open("GET", mapURL);
+			Http.send();
+			Http.onreadystatechange = e => {
+				if (Http.readyState == 4 && Http.status == 200) {
+					let response = JSON.parse(Http.responseText);
+					// distance between the stops divided by the factor = how many times we will call yelp search on this section (# of substops)
+					let iterations = Math.round(response.rows[0].elements[0].distance.value/factor);
+					//console.log(iterations)
+					// latitude difference/# of substops
+					let latDiff = (stops[i].latitude - stops[i-1].latitude)/iterations;
+					// longitude difference/# of substops
+					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;				  
+					for (let j = 1; j < iterations; j++)	{
+						// for each substop, make a yelp request
+						let yelpURL = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(stopType) + "&latitude=" + String(stops[i-1].latitude + latDiff*j) + "&longitude=" + String(stops[i-1].longitude + longDiff*j) + "&radius=" + String(radius);// + "&sort_by=distance";
+						Http.open("GET", yelpURL);
+						Http.setRequestHeader('Authorization', 'Bearer ' + 'crhXlVpb7fS-f0kxhgFDr8ja2OjrWsopyviJeJQUdfON39GlVobMcQ6fuiZsApWiBRVq_SiiCw4cSvAy-5-abf09fZ42N3MpM5zvEavR3GkJ2ep3XbCd5-eMe6L_W3Yx');
+						Http.send();
+						Http.onreadystatechange = (e) => {
+							if (Http.readyState == 4 && Http.status == 200) {
+								var response = JSON.parse(Http.responseText)
+								console.log(response)
+								response['businesses'].forEach(function (business) {
+								var result_json = {
+								  "name": business['name'],
+								  "image_url": business['image_url'],
+								  "is_closed": business['is_closed'],
+								  "review_count": business['review_count'],
+								  "categories": business['categories'],
+								  "rating": business['rating'],
+								  "coordinates": business['coordinates'],
+								  "price": business['price'],
+								  "location": business['location'],
+								}
+								result.push(result_json)
+							  });
+							}
+						}
+						//call back what noneornwo enrowerjowejroweroweir woer ioweirow eroweirow eirowe rwoe r
+						locationSet.add(searchResult);
+					}
+				}
+			};	
+		}
+		var locations = Array.from(locationSet);
+		console.log("end")
+		//return locations;
+		callback(locations);
+	}
+	
 	
 	
 
