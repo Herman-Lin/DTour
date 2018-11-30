@@ -10,13 +10,14 @@ import{
     ActivityIndicator,
     Image,
     TouchableOpacity,
+    Dimensions,
+    ScrollView,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 
-import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
 import { StopStorage } from './StopStorage';
-import LocationSuggestion from './components/LocationSuggestion';
+
 import { createStackNavigator } from 'react-navigation';
 
 import LocationList from './components/LocationList';
@@ -24,6 +25,10 @@ import AddStopPage from './AddStopPage';
 
 import Polyline from '@mapbox/polyline';
 
+import Carousel from 'react-native-snap-carousel';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 export default class RouteMapPage extends Component{
     constructor(props) {
@@ -49,10 +54,14 @@ export default class RouteMapPage extends Component{
 
         suggestions: null,
         suggestionsPolyline: null,
+        carouselInformation: [],
+        focusRegion: null,
         
       };
       this.getSuggestionCallback = this.getSuggestionCallback.bind(this);
       this.mergeLot = this.mergeLot.bind(this);
+      this.carouselRender = this.carouselRender.bind(this);
+      this.focusRegion = this.focusRegion.bind(this);
     }
 
 
@@ -65,29 +74,31 @@ export default class RouteMapPage extends Component{
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
           },
-
+          focusRegion: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.0622,
+            longitudeDelta: 0.0421,
+          },
           userDestination: {
             latitude: 35.0000,
             longitude: -119.000,
-            //latitudeDelta: 0.0622,
-            //longitudeDelta: 0.0421,
           }
         });
         
         if (this.state.displayRoute == 1){
           this.mergeLot();
         }
-       // this.checkRoute();
+      
       }, err => console.log(err));
     }
 
 
     getSuggestionCallback(suggestions) {
-      
-        console.log(suggestions);
       this.setState({
         suggestions: suggestions,
         suggestionsPolyline: suggestions[0].polyline,
+       
       });
 
       let points = Polyline.decode(suggestions[0].polyline);
@@ -106,23 +117,35 @@ export default class RouteMapPage extends Component{
       let stops = suggestions[0].coordinates;
       
      
+      let carousel = []
+      let i=0
+      for (i=0; i < stops.length; i++){
+        if (stops[i].hasOwnProperty('info')){
+          carousel.push({
+            name: stops[i].info.name,
+            image_url: stops[i].info.image_url,
+            latitude: stops[i].latitude,
+            longitude: stops[i].longitude,
+          })
+        }
+      }
       let wayPoints = stops.map((point, index) => {
           return{
             latitude: point.getLatitude(),
             longitude: point.getLongitude(),
 
           }
-      })
-      
+      });
+     
       this.setState({
         wayPoints: wayPoints,
-      })
-      console.log(suggestions[0])
-
-
-
+        carouselInformation: carousel,
+      });
+      console.log(this.state.carouselInformation);
       
-    }
+      console.log(suggestions[0]);
+
+    };
 
     mergeLot(){
       let start = global.stopStorage.getStart();
@@ -131,73 +154,35 @@ export default class RouteMapPage extends Component{
       global.stopStorage.getSuggestion(this.getSuggestionCallback);
 
       console.log(start, destination);
+    }
+
+    
+    carouselRender({item, index}) {
+        return (
+            <View style={styles.card}>
+                <Text style={styles.cardText}>{ item.name}</Text>
+                <Image style={styles.image} source={{uri: item.image_url}}/>
+            </View>
+        );
+        
+    };
 
 
-      /*
-      
-      if (start != null && destination != null) {
-        this.setState(
-          {
-            startLocation: {start},
-            destination: {destination},  
-          }
-        )
-      }
+    focusRegion() {
+      let i = this.refs.carousel.currentIndex;
+      let focus = this.state.carouselInformation[i];
+      this.setState({
+        focusRegion: {latitude: focus.latitude, longitude: focus.longitude, latitudeDelta: 0.0622,
+          longitudeDelta: 0.0421,}
 
-      if (this.state.userLocation.latitude != null && this.state.userLocation.longitude!=null)
-       {
-         let concatLot = this.state.userLocation.latitude +","+ this.state.userLocation.longitude
-        console.log(concatLot)
-         this.setState({
-           concat: concatLot
-         }, () => {
-           console.log(this.state.dummyDestination)
-           this.getDirections(concatLot, this.state.dummyDestination, this.state.dummyValues);
-         });
-       }
-  */
-     }
-
-  
-  async getDirections(startLoc, destinationLoc, wayPoints) {
-    console.log(startLoc, destinationLoc)
-    try {
-      let resp = null
-      if  (wayPoints){
-         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
-
-      }
-      else {
-         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
-      }
-      let respJson = await resp.json();
-      console.log(respJson);
-      let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
-      let coords = points.map((point, index) => {
-          return  {
-              latitude : point[0],
-              longitude : point[1]
-          }
       })
 
-      console.log(coords)
-      this.setState({coords: coords})
-      return coords
-    } catch(error) {
-      alert(error)
-      return error
-   }
-  }
-
-
-    checkRoute(){
-      console.log(stopStorage.getDestination())
-    }
+      console.log(this.state.focusRegion)
+    };   
     
-    prepareRoute(){
-      let startLoc
-    }
+   
 
+  
 
     render(){
 
@@ -205,7 +190,12 @@ export default class RouteMapPage extends Component{
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords} displayRoute={this.state.displayRoute} wayPoints={this.state.wayPoints}/>
+              <UsersMap userLocation={this.state.userLocation}
+                        destinationLocation={this.state.userDestination} 
+                        coordinates={this.state.coords} 
+                        displayRoute={this.state.displayRoute} 
+                        wayPoints={this.state.wayPoints}
+                        focusRegion={this.state.focusRegion}/>
             </View> 
                 
 
@@ -216,15 +206,31 @@ export default class RouteMapPage extends Component{
                       this.props.navigation.navigate('AddStop'); //navigate back to Home screen 
                     }}
                     underlayColor='#fff'>
-              <Icon name={"chevron-left"}  size={40} color="#fff" />
+                  <Icon name={"chevron-left"}  size={40} color="#fff" />
                 
-            </TouchableOpacity>
+                </TouchableOpacity>
             
+            <View style={styles.cardContainer}>
+              <Carousel 
+                  data={this.state.carouselInformation} 
+                  windowSize={1} 
+                  sliderWidth={windowWidth}
+                  itemHeight={windowHeight * .3} 
+                  itemWidth={windowWidth *.9} 
+                  renderItem={this.carouselRender} 
+                  layout={"stack"} 
+                  onScroll={this.focusRegion}
+                  ref={'carousel'}/>
+            </View>
+
           </View>
+
+
         );
     }
 }
 
+//<Carousel layout={'default'} />
 
 const styles = StyleSheet.create({
       description: {
@@ -247,41 +253,64 @@ const styles = StyleSheet.create({
         marginLeft: '3%',
         paddingTop: 5,
         paddingBottom: 5,
-        backgroundColor:'#FF5E5E',
+        backgroundColor:'#000',
+        opacity: 0.4,
         borderRadius: 100,
         position: 'absolute',
         shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 0.5,
+        shadowOpacity: 100,
         shadowRadius: 3,
       },
       backButtonText:{
-        color:'#fff',
+        color:'#000',
         fontSize: 17,
         fontWeight: 'bold',
         textAlign:'center',
         paddingLeft : 10,
         paddingRight : 10,
       },
-      searchInput: {
-        height: 50,
-        padding: 10,
-        marginTop: 80,
-        marginLeft: 20,
-        marginRight: 20,
-        flexGrow: 1,
-        fontSize: 17,
-        color: 'black',
-        backgroundColor: 'white',
-        borderRadius: 6,
-        shadowColor: '#000',
-        shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2
-      },
+  
       map: {
         width: '100%',
         height: '100%',
         alignItems: 'center'
+      },
+
+      card: {
+        
+        height: windowHeight* .25,
+        width: windowWidth*.7,
+        borderRadius: 6,
+        backgroundColor: '#000000',
+      },
+      cardContainer: {
+        marginLeft: '10%',
+        marginTop: 450,
+        alignItems: 'center',
+        width: '100%',
+        height: windowHeight *.4,
+        paddingVertical: 20,
+        
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10
+      },
+      image: {
+        borderRadius: 6,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        opacity: 0.5,
+      },
+      
+      cardText: {
+        color: '#FFF',
+        fontSize: 20,
+        marginTop: 110,
+        marginLeft: 10,
       }
 
     });

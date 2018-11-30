@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import {View, StyleSheet} from 'react-native';
-import MapView, { Polyline } from 'react-native-maps';
+import {View, StyleSheet, ScrollView, Image, Text} from 'react-native';
+import MapView, { Polyline, AnimatedRegion, Animated } from 'react-native-maps';
 
 
-
+var _mapView = MapView;
 //Component used to show map
 mapStyle = [
     {
@@ -193,12 +193,17 @@ mapStyle = [
     }
   ]
 
+ function onRegionChange(region) {
+    this.state.region.setValue(region);
+  }
 
 const usersMap = props => {
     let userLocationMarker = null;
     let userDestinationMarker  = null;
     let routePolyline = null;
     let wayPointMarkers = null;
+    let region = props.userLocation;
+    let cards = null;
     let displayRoute = 0;
   
 
@@ -206,9 +211,11 @@ const usersMap = props => {
         markers : props.wayPoints,
         coords: props.coordinates,
         destinationLatLong: null,
+        region: new AnimatedRegion(props.userLocation),
         displayRoute: 0,
     };
 
+    
     //if (props.userLocation) {
     //    userLocationMarker = <MapView.Marker coordinate={props.userLocation} pinColor="gold" />
     //}
@@ -237,6 +244,11 @@ const usersMap = props => {
         //wayPointMarkers = <MapView.Marker coordinate={this.state.markers} pinColor="red" />
     }
 
+    if(props.focusRegion) {
+      region = props.focusRegion
+      let duration = .5
+     // _mapView.animateToRegion(region, duration)
+    }
    
    
     console.log(props.coordinates)
@@ -251,6 +263,7 @@ const usersMap = props => {
     //<MapView.Marker coordinate={{longitude: marker.longitude, latitude: marker.latitude}} />
     //))}
     return (
+      <View>
         <View style={styles.mapContainer}>
             <MapView 
                 initialRegion = {{
@@ -259,13 +272,15 @@ const usersMap = props => {
                     latitudeDelta: 0.0622,
                     longitudeDelta: 0.0421,
                   }}
-                region={props.userLocation}
+
+                region={region}
                 
                 showsUserLocation={true}
                 followsUserLocation={true}
                 showsMyLocationButton={true}
                 style={styles.map}
                 customMapStyle={mapStyle}
+               
                 > 
                 
                 
@@ -278,7 +293,9 @@ const usersMap = props => {
                 {userDestinationMarker}
 
             </MapView>
-        </View>
+            </View>
+
+            </View>
     );
 ;}
 
@@ -286,7 +303,7 @@ const styles = StyleSheet.create({
     mapContainer: {
         ...StyleSheet.absoluteFillObject,
         width: '100%',
-        height: 800,
+        height: 700,
         justifyContent: 'center',
         alignItems: 'center',
         
@@ -297,7 +314,10 @@ const styles = StyleSheet.create({
     },
     marker: {
         color: '#FF7F50',
-    }
+    },
+   
+
+
 });
 
 export default usersMap;
