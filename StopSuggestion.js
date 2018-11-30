@@ -2,6 +2,8 @@
 
 import React, { Component } from 'react';
 
+global.gimmeSet = new Set();
+
 export class StopSuggestion	{
 	
   /**
@@ -141,7 +143,6 @@ export class StopSuggestion	{
    */
 	generate_stops = (callback, stops, stopType) => {
 		// set to remove dupes
-		var locationSet = new Set();
 		var key = "AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
 		var radius = 180;
 		var overlap = 110;
@@ -187,20 +188,19 @@ export class StopSuggestion	{
 								  "price": business['price'],
 								  "location": business['location'],
 								}
-								result.push(result_json)
+								callback(result_json)
+								//result.push(result_json)
 							  });
 							}
 						}
-						//call back what noneornwo enrowerjowejroweroweir woer ioweirow eroweirow eirowe rwoe r
-						locationSet.add(searchResult);
 					}
 				}
 			};	
 		}
-		var locations = Array.from(locationSet);
-		console.log("end")
-		//return locations;
-		callback(locations);
+	}
+	
+	add_to_set(input) =>	{
+		global.gimmeSet.add(input);
 	}
 	
 	
