@@ -9,7 +9,9 @@ import{
     Button,
     ActivityIndicator,
     Image,
+    ScrollView,
     TouchableOpacity,
+    Dimensions,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 
@@ -24,6 +26,10 @@ import AddStopPage from './AddStopPage';
 
 import Polyline from '@mapbox/polyline';
 
+import Carousel from 'react-native-snap-carousel';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 export default class RouteMapPage extends Component{
     constructor(props) {
@@ -53,6 +59,7 @@ export default class RouteMapPage extends Component{
       };
       this.getSuggestionCallback = this.getSuggestionCallback.bind(this);
       this.mergeLot = this.mergeLot.bind(this);
+      this.carouselRender = this.carouselRender.bind(this);
     }
 
 
@@ -77,7 +84,7 @@ export default class RouteMapPage extends Component{
         if (this.state.displayRoute == 1){
           this.mergeLot();
         }
-       // this.checkRoute();
+      
       }, err => console.log(err));
     }
 
@@ -117,12 +124,14 @@ export default class RouteMapPage extends Component{
       this.setState({
         wayPoints: wayPoints,
       })
+      
+      
       console.log(suggestions[0])
 
 
 
       
-    }
+    };
 
     mergeLot(){
       let start = global.stopStorage.getStart();
@@ -131,73 +140,18 @@ export default class RouteMapPage extends Component{
       global.stopStorage.getSuggestion(this.getSuggestionCallback);
 
       console.log(start, destination);
+    }
 
-
-      /*
-      
-      if (start != null && destination != null) {
-        this.setState(
-          {
-            startLocation: {start},
-            destination: {destination},  
-          }
-        )
-      }
-
-      if (this.state.userLocation.latitude != null && this.state.userLocation.longitude!=null)
-       {
-         let concatLot = this.state.userLocation.latitude +","+ this.state.userLocation.longitude
-        console.log(concatLot)
-         this.setState({
-           concat: concatLot
-         }, () => {
-           console.log(this.state.dummyDestination)
-           this.getDirections(concatLot, this.state.dummyDestination, this.state.dummyValues);
-         });
-       }
-  */
-     }
+    carouselRender({item, index}) {
+        return (
+            <View style={styles.card}>
+                <Text style={{size: 10}}>{ item.title}</Text>
+            </View>
+        );
+    };
+   
 
   
-  async getDirections(startLoc, destinationLoc, wayPoints) {
-    console.log(startLoc, destinationLoc)
-    try {
-      let resp = null
-      if  (wayPoints){
-         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
-
-      }
-      else {
-         resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
-      }
-      let respJson = await resp.json();
-      console.log(respJson);
-      let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
-      let coords = points.map((point, index) => {
-          return  {
-              latitude : point[0],
-              longitude : point[1]
-          }
-      })
-
-      console.log(coords)
-      this.setState({coords: coords})
-      return coords
-    } catch(error) {
-      alert(error)
-      return error
-   }
-  }
-
-
-    checkRoute(){
-      console.log(stopStorage.getDestination())
-    }
-    
-    prepareRoute(){
-      let startLoc
-    }
-
 
     render(){
 
@@ -216,15 +170,28 @@ export default class RouteMapPage extends Component{
                       this.props.navigation.navigate('AddStop'); //navigate back to Home screen 
                     }}
                     underlayColor='#fff'>
-              <Icon name={"chevron-left"}  size={40} color="#fff" />
+                  <Icon name={"chevron-left"}  size={40} color="#fff" />
                 
-            </TouchableOpacity>
+                </TouchableOpacity>
             
+            <View style={styles.cardContainer}>
+              <Carousel 
+                  data={[{title: "yis"}, {title: "boi"}]} 
+                  windowSize={1} 
+                  sliderWidth={windowWidth}
+                  itemHeight={windowHeight * .3} 
+                  itemWidth={windowWidth *.9} 
+                  renderItem={this.carouselRender}  />
+            </View>
+
           </View>
+
+
         );
     }
 }
 
+//<Carousel layout={'default'} />
 
 const styles = StyleSheet.create({
       description: {
@@ -282,6 +249,21 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center'
+      },
+
+      card: {
+        height: windowHeight* .3,
+        width: windowWidth*.8,
+        borderRadius: 3,
+        backgroundColor: '#FF7F50',
+      },
+      cardContainer: {
+        marginLeft: '5%',
+        marginTop: 500,
+        alignItems: 'center',
+        width: '90%',
+        paddingVertical: 20,
+        
       }
 
     });

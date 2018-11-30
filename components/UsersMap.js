@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, ScrollView, Image, Text} from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
 
 
@@ -199,6 +199,7 @@ const usersMap = props => {
     let userDestinationMarker  = null;
     let routePolyline = null;
     let wayPointMarkers = null;
+    let cards = null;
     let displayRoute = 0;
   
 
@@ -237,6 +238,15 @@ const usersMap = props => {
         //wayPointMarkers = <MapView.Marker coordinate={this.state.markers} pinColor="red" />
     }
 
+    if (props.displayRoute == 1){
+        cards = <View> 
+          <ScrollView
+              horizontal={true}
+              contentContainerStyle={styles.cardContainer}> 
+          </ScrollView>
+        </View>
+    }
+
    
    
     console.log(props.coordinates)
@@ -251,6 +261,7 @@ const usersMap = props => {
     //<MapView.Marker coordinate={{longitude: marker.longitude, latitude: marker.latitude}} />
     //))}
     return (
+      <View>
         <View style={styles.mapContainer}>
             <MapView 
                 initialRegion = {{
@@ -259,6 +270,7 @@ const usersMap = props => {
                     latitudeDelta: 0.0622,
                     longitudeDelta: 0.0421,
                   }}
+
                 region={props.userLocation}
                 
                 showsUserLocation={true}
@@ -278,7 +290,9 @@ const usersMap = props => {
                 {userDestinationMarker}
 
             </MapView>
-        </View>
+            </View>
+
+            </View>
     );
 ;}
 
@@ -286,7 +300,7 @@ const styles = StyleSheet.create({
     mapContainer: {
         ...StyleSheet.absoluteFillObject,
         width: '100%',
-        height: 800,
+        height: 700,
         justifyContent: 'center',
         alignItems: 'center',
         
@@ -297,7 +311,10 @@ const styles = StyleSheet.create({
     },
     marker: {
         color: '#FF7F50',
-    }
+    },
+   
+
+
 });
 
 export default usersMap;
