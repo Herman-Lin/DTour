@@ -9,16 +9,15 @@ import{
     Button,
     ActivityIndicator,
     Image,
-    ScrollView,
     TouchableOpacity,
     Dimensions,
+    ScrollView,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 
-import FetchLocation from './components/FetchLocation';
 import UsersMap from './components/UsersMap';
 import { StopStorage } from './StopStorage';
-import LocationSuggestion from './components/LocationSuggestion';
+
 import { createStackNavigator } from 'react-navigation';
 
 import LocationList from './components/LocationList';
@@ -55,11 +54,14 @@ export default class RouteMapPage extends Component{
 
         suggestions: null,
         suggestionsPolyline: null,
+        carouselInformation: [],
+        focusRegion: null,
         
       };
       this.getSuggestionCallback = this.getSuggestionCallback.bind(this);
       this.mergeLot = this.mergeLot.bind(this);
       this.carouselRender = this.carouselRender.bind(this);
+      this.focusRegion = this.focusRegion.bind(this);
     }
 
 
@@ -72,12 +74,15 @@ export default class RouteMapPage extends Component{
             latitudeDelta: 0.0622,
             longitudeDelta: 0.0421,
           },
-
+          focusRegion: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.0622,
+            longitudeDelta: 0.0421,
+          },
           userDestination: {
             latitude: 35.0000,
             longitude: -119.000,
-            //latitudeDelta: 0.0622,
-            //longitudeDelta: 0.0421,
           }
         });
         
@@ -90,11 +95,10 @@ export default class RouteMapPage extends Component{
 
 
     getSuggestionCallback(suggestions) {
-      
-        console.log(suggestions);
       this.setState({
         suggestions: suggestions,
         suggestionsPolyline: suggestions[0].polyline,
+       
       });
 
       let points = Polyline.decode(suggestions[0].polyline);
@@ -113,24 +117,34 @@ export default class RouteMapPage extends Component{
       let stops = suggestions[0].coordinates;
       
      
+      let carousel = []
+      let i=0
+      for (i=0; i < stops.length; i++){
+        if (stops[i].hasOwnProperty('info')){
+          carousel.push({
+            name: stops[i].info.name,
+            image_url: stops[i].info.image_url,
+            latitude: stops[i].latitude,
+            longitude: stops[i].longitude,
+          })
+        }
+      }
       let wayPoints = stops.map((point, index) => {
           return{
             latitude: point.getLatitude(),
             longitude: point.getLongitude(),
 
           }
-      })
-      
+      });
+     
       this.setState({
         wayPoints: wayPoints,
-      })
+        carouselInformation: carousel,
+      });
+      console.log(this.state.carouselInformation);
       
-      
-      console.log(suggestions[0])
+      console.log(suggestions[0]);
 
-
-
-      
     };
 
     mergeLot(){
@@ -142,13 +156,30 @@ export default class RouteMapPage extends Component{
       console.log(start, destination);
     }
 
+    
     carouselRender({item, index}) {
         return (
             <View style={styles.card}>
-                <Text style={{size: 10}}>{ item.title}</Text>
+                <Text style={styles.cardText}>{ item.name}</Text>
+                <Image style={styles.image} source={{uri: item.image_url}}/>
             </View>
         );
+        
     };
+
+
+    focusRegion() {
+      let i = this.refs.carousel.currentIndex;
+      let focus = this.state.carouselInformation[i];
+      this.setState({
+        focusRegion: {latitude: focus.latitude, longitude: focus.longitude, latitudeDelta: 0.0622,
+          longitudeDelta: 0.0421,}
+
+      })
+
+      console.log(this.state.focusRegion)
+    };   
+    
    
 
   
@@ -159,7 +190,12 @@ export default class RouteMapPage extends Component{
         return (
           <View>
             <View>
-              <UsersMap userLocation={this.state.userLocation} destinationLocation={this.state.userDestination} coordinates={this.state.coords} displayRoute={this.state.displayRoute} wayPoints={this.state.wayPoints}/>
+              <UsersMap userLocation={this.state.userLocation}
+                        destinationLocation={this.state.userDestination} 
+                        coordinates={this.state.coords} 
+                        displayRoute={this.state.displayRoute} 
+                        wayPoints={this.state.wayPoints}
+                        focusRegion={this.state.focusRegion}/>
             </View> 
                 
 
@@ -176,12 +212,15 @@ export default class RouteMapPage extends Component{
             
             <View style={styles.cardContainer}>
               <Carousel 
-                  data={[{title: "yis"}, {title: "boi"}]} 
+                  data={this.state.carouselInformation} 
                   windowSize={1} 
                   sliderWidth={windowWidth}
                   itemHeight={windowHeight * .3} 
                   itemWidth={windowWidth *.9} 
-                  renderItem={this.carouselRender}  />
+                  renderItem={this.carouselRender} 
+                  layout={"stack"} 
+                  onScroll={this.focusRegion}
+                  ref={'carousel'}/>
             </View>
 
           </View>
@@ -214,37 +253,23 @@ const styles = StyleSheet.create({
         marginLeft: '3%',
         paddingTop: 5,
         paddingBottom: 5,
-        backgroundColor:'#FF5E5E',
+        backgroundColor:'#000',
+        opacity: 0.4,
         borderRadius: 100,
         position: 'absolute',
         shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 0.5,
+        shadowOpacity: 100,
         shadowRadius: 3,
       },
       backButtonText:{
-        color:'#fff',
+        color:'#000',
         fontSize: 17,
         fontWeight: 'bold',
         textAlign:'center',
         paddingLeft : 10,
         paddingRight : 10,
       },
-      searchInput: {
-        height: 50,
-        padding: 10,
-        marginTop: 80,
-        marginLeft: 20,
-        marginRight: 20,
-        flexGrow: 1,
-        fontSize: 17,
-        color: 'black',
-        backgroundColor: 'white',
-        borderRadius: 6,
-        shadowColor: '#000',
-        shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2
-      },
+  
       map: {
         width: '100%',
         height: '100%',
@@ -252,18 +277,40 @@ const styles = StyleSheet.create({
       },
 
       card: {
-        height: windowHeight* .3,
-        width: windowWidth*.8,
-        borderRadius: 3,
-        backgroundColor: '#FF7F50',
+        
+        height: windowHeight* .25,
+        width: windowWidth*.7,
+        borderRadius: 6,
+        backgroundColor: '#000000',
       },
       cardContainer: {
-        marginLeft: '5%',
-        marginTop: 500,
+        marginLeft: '10%',
+        marginTop: 450,
         alignItems: 'center',
-        width: '90%',
+        width: '100%',
+        height: windowHeight *.4,
         paddingVertical: 20,
         
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10
+      },
+      image: {
+        borderRadius: 6,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        opacity: 0.5,
+      },
+      
+      cardText: {
+        color: '#FFF',
+        fontSize: 20,
+        marginTop: 110,
+        marginLeft: 10,
       }
 
     });
