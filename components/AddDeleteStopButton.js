@@ -5,9 +5,7 @@ class AddDeleteStopButton extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            addOpacity: 1,
             addDisabled: false,
-            deleteOpacity: 0.5,
             deleteDisabled: true,
         }
     }
@@ -15,12 +13,13 @@ class AddDeleteStopButton extends React.Component {
         let addStop = this.props.addStop;
         let removeStop =this.props.deleteStop;
         let resultJson = this.props.suggestion_json;
+
         if(this.state.deleteDisabled){
         return (
             <View>
-            <TouchableOpacity style={styles.addStopButton} disable = {this.state.addDisabled}
-                onPress={() => {addStop(resultJson); this.setState({addOpacity: 0.5, deleteOpacity: 1, addDisabled: true, deleteDisabled: false})}}>
-              <Text style={[styles.addStopButtonText, {opacity: this.state.addOpacity} ]}>Add</Text>
+            <TouchableOpacity style={styles.addStopButton}
+                onPress={() => {addStop(resultJson); this.setState({addDisabled: true, deleteDisabled: false})}}>
+              <Text style={styles.addStopButtonText}>Add</Text>
             </TouchableOpacity>
             </View>
         )
@@ -28,10 +27,10 @@ class AddDeleteStopButton extends React.Component {
         else{
         return (
             <View>
-            <TouchableOpacity style={styles.removeStopButton} disable={this.state.deleteDisabled}
+            <TouchableOpacity style={styles.removeStopButton}
                 onPress={()=>{removeStop(resultJson);
-                            this.setState({deleteOpacity: 0.5, addOpacity: 1, deleteDisabled: true, addDisabled: false})}}>
-              <Text style={[styles.addStopButtonText, {opacity:this.state.deleteOpacity}]}>Delete</Text>
+                            this.setState({deleteDisabled: true, addDisabled: false})}}>
+              <Text style={styles.addStopButtonText}>Delete</Text>
             </TouchableOpacity>
             </View>
         )

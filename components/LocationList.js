@@ -19,34 +19,23 @@ class LocationList extends React.Component {
                 </ScrollView>
             )
         }
-        else if(this.props.currentSearch >= 0 && this.props.currentSearch !== null){
+        else{
             return (
+
                 <View>
                   <ScrollView style={{padding: 10}}>
                     {this.props.results.map((suggestion, index) => {
                         return <LocationSuggestion key={index} name={suggestion.name} rating={suggestion.rating}
                             image_url={suggestion.image_url} categories={suggestion.categories} price={suggestion.price}
                             display_address={suggestion.location.display_address[0]} suggestion_json={JSON.stringify(suggestion)}
-                            addStop={this.props.addStop} deleteStop={this.props.deleteStop}
+                            addStop={(this.props.currentSearch >= 0) ? this.props.addStop : this.props.addDest} deleteStop={this.props.deleteStop}
                         />
                         })}
                   </ScrollView>
                 </View>
             )
         }
-        else{
-            return(
-            <ScrollView style={{padding: 10}}>
-              {this.props.results.map((suggestion, index) => {
-                  return <LocationSuggestion key={index} name={suggestion.name} rating={suggestion.rating}
-                      image_url={suggestion.image_url} categories={suggestion.categories} price={suggestion.price}
-                      display_address={suggestion.location.display_address[0]} suggestion_json={JSON.stringify(suggestion)}
-                      addStop={this.props.addDest}
-                  />
-                  })}
-            </ScrollView>
-            )
-        }
+
     }
 }
 const styles = StyleSheet.create({

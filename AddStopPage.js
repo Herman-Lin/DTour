@@ -45,13 +45,11 @@ export default class AddStopPage extends Component{
         currentStops: [], //help for deletion later, holds json of stops
         stopSearchStrings: [], // holds the search strings for stops
         stopList: [{}],
-
         searchEditable: true,
         stopsToAdd: [], // for multiselecting stops to be pushed to into stopStorage
-
-		    recommendedStops: new Set(),
-
+		recommendedStops: new Set(),
         showGenerateButton: true,
+        destinationSet: false,
       };
 
     }
@@ -231,7 +229,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
-      this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false}); // 0, 1, ... used for index in stopSearchStrings array
+      this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false,}); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
@@ -276,10 +274,12 @@ export default class AddStopPage extends Component{
         this.setState({results: []});
         let result = JSON.parse(r);
         this.state.destSearchString = result.name;
+        this.state.destinationSet = true;
         global.stopStorage.setDestination(r);
     }
 
     onAddStop = (r) => {
+
         this.state.stopsToAdd.push(r);
     }
 
@@ -288,12 +288,12 @@ export default class AddStopPage extends Component{
     }
 
     onDone = () =>{
-        this.state.currentStops[this.state.currentSearch] = this.state.stopsToAdd;
+
         if(this.state.stopsToAdd.length !== 0){
             global.stopStorage.addStop(this.state.stopsToAdd);
+            this.state.currentStops[this.state.currentSearch] = this.state.stopsToAdd;
         }
         this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1, showGenerateButton: true});
-
     }
 
     addStopSearchBar = (e) => {
@@ -302,9 +302,22 @@ export default class AddStopPage extends Component{
       }));
     }
 
+//    onStopEdit = (index) => {
+//        if(this.state.currentStops[index]){
+//            this.state.currentStops[index].forEach(function(j){
+//                global.stopStorage.deleteStopByJSON(j);
+//            })
+//            this.state.currentStops[index] = [];
+//          }
+//
+//    }
+
     removeStop = (index) => {
       if(this.state.currentStops[index]){
-        global.stopStorage.deleteStopByJSON(this.state.currentStops[index]);
+        this.state.currentStops[index].forEach(function(j){
+            global.stopStorage.deleteStopByJSON(j);
+        })
+        this.state.currentStops[index] = [];
       }
 
       this.setState({
@@ -381,7 +394,7 @@ export default class AddStopPage extends Component{
                     toCoord={this.address_suggestion_to_coord}
                 />
             </View>
-            {this.state.showGenerateButton && <TouchableOpacity
+            {this.state.showGenerateButton && this.state.destinationSet && <TouchableOpacity
               style={styles.generateButton}
               onPress={() => {global.stopStorage.getAllStops();
                 this.props.navigation.navigate('RouteMap');
