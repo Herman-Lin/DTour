@@ -151,7 +151,7 @@ export default class AddStopPage extends Component{
             results: result,
 			recommendedStops: recommend
           });
-		  console.log(this.state.results.length + " " + this.state.recommendedStops.size + " " + recommend.size)
+		  //console.log(this.state.results.length + " " + this.state.recommendedStops.size + " " + recommend.size)
 		  //for (let item of this.state.recommendedStops) console.log(item)
         }
       }
@@ -161,13 +161,14 @@ export default class AddStopPage extends Component{
 		this.setState({
 			recommendedStops: new Set()
          });
-		var radius = 180;	// miles to meters
-		var overlap = 110; // miles to meters
+		 // 180 is too small, rarely returns anything
+		var radius = 180;	
+		var overlap = 110; 
 		// how far each search substop will be spaced apart
 		var factor = 2 * radius - overlap; 
-        const Http = new XMLHttpRequest();
 		// for all stops, find substops and do yelp search for all of them
 		for (let i = 1; i < stops.length; i++)	{
+			const Http = new XMLHttpRequest();
 			// find the distance between each pair of stops, and calculate how many times to search on this section
 			let mapURL = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="+ String(stops[i-1].latitude) + "," + String(stops[i-1].longitude) + "&destinations=" + String(stops[i].latitude) + "," + String(stops[i].longitude) +"&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
 			Http.open("GET", mapURL);
@@ -243,7 +244,7 @@ export default class AddStopPage extends Component{
 	// testing
 /* 	_onSearchPressed3 = () => {
       if (this.state.destSearchString === undefined || this.state.destSearchString == "") return;
-	  var stops = [{latitude: 34.0689, longitude: 118.4452}, {latitude: 34.0635, longitude: 118.4455}]
+	  var stops = [{latitude: 34.0689, longitude: 118.4452}, {latitude: 34.0635, longitude: 118.4455}, {latitude: 33.9416, longitude: 118.4085}]
 	  this.generate_stops(stops, this.state.destSearchString)
       this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
     }; */
