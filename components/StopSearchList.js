@@ -13,6 +13,7 @@ class StopSearchList extends React.Component {
                         value={this.props.searchString[index]}
                         onSubmitEditing={() => this.props.submitFunc(index)}
                         onChange={(e) => this.props.changeFunc(index, e)}
+                        editable={this.props.searchEditable}
                         placeholder='Add a Stop'/>
                       <TouchableOpacity
                         style={styles.removeStopButton}

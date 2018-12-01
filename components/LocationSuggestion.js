@@ -1,10 +1,9 @@
 import React from 'react';
+import AddRemoveStopButton from './AddDeleteStopButton';
 import {View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-native';
 
 class LocationSuggestion extends React.Component {
     render() {
-        let addStop = this.props.addStop;
-        let resultJson = this.props.suggestion_json;
         return (
             <View style={styles.resultRow}>
                 <Image source={{uri: this.props.image_url}}
@@ -15,11 +14,8 @@ class LocationSuggestion extends React.Component {
                     <Text>{this.props.categories[0] === undefined ? "" : this.props.categories[0].title}</Text>
                     <Text>{this.props.display_address}</Text>
                 </View>
-                <View style={{flexDirection: 'column', width: 50, marginTop: 30, marginRight: 5}}>
-                    <TouchableOpacity style={styles.addStopButton} onPress={()=>addStop(resultJson)}>
-                      <Text style={styles.addStopButtonText}>Add</Text>
-                    </TouchableOpacity>
-
+                <View style={{flexDirection: 'column', width: 70, marginTop: 30, marginRight: 5}}>
+                    <AddRemoveStopButton addStop={this.props.addStop} deleteStop={this.props.deleteStop} suggestion_json={this.props.suggestion_json}/>
                 </View>
             </View>
         )

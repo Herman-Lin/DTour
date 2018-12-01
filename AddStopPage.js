@@ -41,11 +41,12 @@ export default class AddStopPage extends Component{
         addressSuggestions: [],
         addressResult: null,
         userLocation: null,
-        currentSearch: null,
-        currentSearchResult: null,
+        currentSearch: null, // current index on the stop array we are searching on, -1 for start, -2 for dest
         currentStops: [], //help for deletion later, holds json of stops
         stopSearchStrings: [], // holds the search strings for stops
         stopList: [{}],
+        searchEditable: true,
+        stopsToAdd: [], // for multiselecting stops to be pushed to into stopStorage
       };
 
     }
@@ -170,7 +171,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
-      this.setState({ isLoading: true, currentSearch: index }); // 0, 1, ... used for index in stopSearchStrings array
+      this.setState({ isLoading: true, currentSearch: index, searchEditable: false }); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
@@ -203,25 +204,29 @@ export default class AddStopPage extends Component{
       }, err => console.log(err));
     }
 
-    onAddStop = (r) => {
-        this.setState({currentSearchResult: r, results: []});
+    onAddDest = (r) => {
+        this.setState({results: []});
         let result = JSON.parse(r);
-        if(this.state.currentSearch === -1){ // start point
-            this.state.startSearchString = result.name;
-            //set start
-        }
-        else if(this.state.currentSearch === -2){ //destination
-            this.state.destSearchString = result.name;
-            global.stopStorage.setDestination(r);
-        }
-        else{ // stops
-            this.state.stopSearchStrings[this.state.currentSearch] = result.name;
-            this.state.currentStops[this.state.currentSearch] = r;
-            global.stopStorage.addStop(r);
-        }
+        this.state.destSearchString = result.name;
+        global.stopStorage.setDestination(r);
     }
 
+    onAddStop = (r) => {
+        this.state.stopsToAdd.push(r);
+    }
 
+    onDeleteStop = (r) => {
+        this.state.stopsToAdd.filter(json => json !== r);
+    }
+
+    onDone = () =>{
+        this.state.currentStops[this.state.currentSearch] = this.state.stopsToAdd;
+        if(this.state.stopsToAdd.length !== 0){
+            global.stopStorage.addStop(this.state.stopsToAdd);
+        }
+        this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1});
+
+    }
 
     addStopSearchBar = (e) => {
       this.setState((prevState) => ({
@@ -274,6 +279,7 @@ export default class AddStopPage extends Component{
                   value={this.state.startSearchString}
                   onSubmitEditing={this._onSearchPressed1}
                   onChange={this._onSearchTextChanged1}
+                  editable={this.state.searchEditable}
                   placeholder='Current Location'/>
                 <TouchableOpacity
                   style={styles.addStopButton}
@@ -285,6 +291,7 @@ export default class AddStopPage extends Component{
                               searchString={this.state.stopSearchStrings}
                               changeFunc={this._onSearchTextChanged2}
                               submitFunc={this._onSearchPressed2}
+                              searchEditable={this.state.searchEditable}
                               removeFunc={this.removeStop}/>
               <View style={styles.destSearchBar}>
                 <TextInput autoFocus
@@ -292,12 +299,15 @@ export default class AddStopPage extends Component{
                   value={this.state.destSearchString}
                   onSubmitEditing={this._onSearchPressed3}
                   onChange={this._onSearchTextChanged3}
+                  editable={this.state.searchEditable}
                   placeholder='Destination'/>
               </View>
             </View>
+
             <View style={styles.container}>
-                {/*<Text>{this.state.textValue}</Text>*/}
-                <LocationList addStop={this.onAddStop} results={this.state.results}
+                <LocationList addStop={this.onAddStop} deleteStop={this.onDeleteStop}
+                    clickDone={this.onDone}
+                    addDest={this.onAddDest} results={this.state.results}
                     addressSuggestions={this.state.addressSuggestions}
                     currentSearch={this.state.currentSearch}
                     toCoord={this.address_suggestion_to_coord}
