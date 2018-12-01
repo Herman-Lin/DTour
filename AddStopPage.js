@@ -49,8 +49,9 @@ export default class AddStopPage extends Component{
         searchEditable: true,
         stopsToAdd: [], // for multiselecting stops to be pushed to into stopStorage
 
-		recommendedStops: new Set(),
+		    recommendedStops: new Set(),
 
+        showGenerateButton: true,
       };
 
     }
@@ -148,7 +149,7 @@ export default class AddStopPage extends Component{
 				recommend.add(result_json)
 			}
           });
-		  		  
+
           this.setState({
             isLoading: false,
             textValue: JSON.stringify(result),
@@ -160,16 +161,16 @@ export default class AddStopPage extends Component{
         }
       }
     }
-	
+
 	generate_stops = (stops, stopType) => {
 		this.setState({
 			recommendedStops: new Set()
          });
 		 // 180 is too small, rarely returns anything
-		var radius = 180;	
-		var overlap = 110; 
+		var radius = 180;
+		var overlap = 110;
 		// how far each search substop will be spaced apart
-		var factor = 2 * radius - overlap; 
+		var factor = 2 * radius - overlap;
 		// for all stops, find substops and do yelp search for all of them
 		for (let i = 1; i < stops.length; i++)	{
 			const Http = new XMLHttpRequest();
@@ -189,14 +190,14 @@ export default class AddStopPage extends Component{
 					// latitude difference/# of substops
 					let latDiff = (stops[i].latitude - stops[i-1].latitude)/iterations;
 					// longitude difference/# of substops
-					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;	
+					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;
 					// if stops are closer than 250m apart, only search the start
 					for (let j = 0; j < iterations; j++)	{
 						// for each substop, make a yelp request
 						this.yelp_search(stopType, stops[i-1].latitude + latDiff*j, stops[i-1].longitude + longDiff*j, radius);
 					}
 				}
-			};	
+			};
 		}
 	}
 
@@ -230,7 +231,7 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
-      this.setState({ isLoading: true, currentSearch: index, searchEditable: false }); // 0, 1, ... used for index in stopSearchStrings array
+      this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false}); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
@@ -244,7 +245,7 @@ export default class AddStopPage extends Component{
       this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
       console.log(this.state.routeSuggestions);
     };
-	
+
 	// testing
 /* 	_onSearchPressed3 = () => {
       if (this.state.destSearchString === undefined || this.state.destSearchString == "") return;
@@ -291,7 +292,7 @@ export default class AddStopPage extends Component{
         if(this.state.stopsToAdd.length !== 0){
             global.stopStorage.addStop(this.state.stopsToAdd);
         }
-        this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1});
+        this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1, showGenerateButton: true});
 
     }
 
@@ -380,14 +381,19 @@ export default class AddStopPage extends Component{
                     toCoord={this.address_suggestion_to_coord}
                 />
             </View>
-            <TouchableOpacity
+            {this.state.showGenerateButton && <TouchableOpacity
               style={styles.generateButton}
               onPress={() => {global.stopStorage.getAllStops();
                 this.props.navigation.navigate('RouteMap');
               }}
               underlayColor='#fff'>
               <Text style={styles.generateButtonText}> Generate Route</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
+            {!this.state.showGenerateButton && <TouchableOpacity onPress={() => this.onDone()}
+                style={styles.doneButton}
+                underlayColor='#fff'>
+                <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>}
           </View>
         );
     }
@@ -408,7 +414,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 6,
-        height: 400,
+        height: 370,
       },
       addStopButton:{
         marginTop: 10,
@@ -422,22 +428,43 @@ const styles = StyleSheet.create({
       },
       generateButton:{
         marginTop: 540,
-        // marginLeft: 115,
         marginLeft: '27%',
-        paddingTop: 15,
-        paddingBottom: 15,
         backgroundColor:'#FF5E5E',
         borderRadius: 15,
         position: 'absolute',
         shadowOffset: { width: 2, height: 5 },
         shadowOpacity: 0.5,
         shadowRadius: 3,
+        elevation: 3,
       },
       generateButtonText:{
         color:'#fff',
         fontSize: 17,
         fontWeight: 'bold',
         textAlign:'center',
+        paddingTop: 15,
+        paddingBottom: 15,
+        paddingLeft : 10,
+        paddingRight : 10,
+      },
+      doneButton:{
+        marginTop: 540,
+        marginLeft: '32%',
+        backgroundColor:'#FF5E5E',
+        borderRadius: 15,
+        position: 'absolute',
+        shadowOffset: { width: 2, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 3,
+        elevation: 3,
+      },
+      doneButtonText:{
+        color:'#fff',
+        fontSize: 17,
+        fontWeight: 'bold',
+        textAlign:'center',
+        paddingTop: 15,
+        paddingBottom: 15,
         paddingLeft : 10,
         paddingRight : 10,
       },
@@ -455,9 +482,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         shadowColor: '#000',
-        // shadowOffset: { width: 2, height: 5 },
-        // shadowOpacity: 0.2,
-        // shadowRadius: 2,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
