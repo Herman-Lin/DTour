@@ -24,7 +24,6 @@ class LocationList extends React.Component {
 
                 <View>
                   <ScrollView style={{padding: 10}}>
-                                  <Text>{JSON.stringify(this.props.stopsToAdd)}</Text>
 
                     {this.props.results.map((suggestion, index) => {
                         return <LocationSuggestion key={index} name={suggestion.name} rating={suggestion.rating}
