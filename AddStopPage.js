@@ -45,8 +45,12 @@ export default class AddStopPage extends Component{
         currentStops: [], //help for deletion later, holds json of stops
         stopSearchStrings: [], // holds the search strings for stops
         stopList: [{}],
+
         searchEditable: true,
         stopsToAdd: [], // for multiselecting stops to be pushed to into stopStorage
+
+		recommendedStops: new Set(),
+
       };
 
     }
@@ -104,10 +108,14 @@ export default class AddStopPage extends Component{
     };
   };
 
-    yelp_search = (search_str, latitude, longitude) => {
+    yelp_search = (search_str, latitude, longitude, radius) => {
       const Http = new XMLHttpRequest();
       var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(search_str) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude);
-      Http.open("GET", url);
+      if (radius != undefined)	{
+		url = url + "&radius=" + String(radius);
+	  }
+	  console.log(url)
+	  Http.open("GET", url);
       Http.setRequestHeader('Authorization', 'Bearer ' + 'nMpM6dLuTMoyzu4q1dCBJPsSSSjqZ9UP7pTrRLbR5PSNni3wcHhZWKbAHRxYRhoosUdTkvmP5-D4HtAUbNLNXyensvOMaUw5nS_raYiV1raMvDNO5_t0-hF7GJH_W3Yx');
       Http.send();
       Http.onreadystatechange = (e) => {
@@ -115,6 +123,7 @@ export default class AddStopPage extends Component{
           var response = JSON.parse(Http.responseText)
 
           var result = [];
+		  var recommend = this.state.recommendedStops;
 
           response['businesses'].forEach(function (business) {
             var result_json = {
@@ -129,17 +138,67 @@ export default class AddStopPage extends Component{
               "location": business['location'],
             }
             result.push(result_json)
+			let not_duplicate = true
+			for (let item of recommend)	{
+				if (item.name == result_json.name)	{
+					not_duplicate = false
+				}
+			}
+			if (not_duplicate)	{
+				recommend.add(result_json)
+			}
           });
-
+		  		  
           this.setState({
             isLoading: false,
             textValue: JSON.stringify(result),
-            results: result
+            results: result,
+			recommendedStops: recommend
           });
+		  //console.log(this.state.results.length + " " + this.state.recommendedStops.size + " " + recommend.size)
+		  //for (let item of this.state.recommendedStops) console.log(item)
         }
       }
     }
-
+	
+	generate_stops = (stops, stopType) => {
+		this.setState({
+			recommendedStops: new Set()
+         });
+		 // 180 is too small, rarely returns anything
+		var radius = 180;	
+		var overlap = 110; 
+		// how far each search substop will be spaced apart
+		var factor = 2 * radius - overlap; 
+		// for all stops, find substops and do yelp search for all of them
+		for (let i = 1; i < stops.length; i++)	{
+			const Http = new XMLHttpRequest();
+			// find the distance between each pair of stops, and calculate how many times to search on this section
+			let mapURL = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="+ String(stops[i-1].latitude) + "," + String(stops[i-1].longitude) + "&destinations=" + String(stops[i].latitude) + "," + String(stops[i].longitude) +"&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60";
+			Http.open("GET", mapURL);
+			Http.send();
+			Http.onreadystatechange = e => {
+				if (Http.readyState == 4 && Http.status == 200) {
+					let response = JSON.parse(Http.responseText);
+					// distance between the stops divided by the factor = how many times we will call yelp search on this section (# of substops)
+					let iterations = Math.round(response.rows[0].elements[0].distance.value/factor);
+					if (iterations < 1) {
+						iterations = 1;
+					}
+					//console.log(iterations)
+					// latitude difference/# of substops
+					let latDiff = (stops[i].latitude - stops[i-1].latitude)/iterations;
+					// longitude difference/# of substops
+					let longDiff = (stops[i].longitude - stops[i-1].longitude)/iterations;	
+					// if stops are closer than 250m apart, only search the start
+					for (let j = 0; j < iterations; j++)	{
+						// for each substop, make a yelp request
+						this.yelp_search(stopType, stops[i-1].latitude + latDiff*j, stops[i-1].longitude + longDiff*j, radius);
+					}
+				}
+			};	
+		}
+	}
 
     _onSearchTextChanged1 = (event) => {
       //console.log('_onSearchTextChanged');
@@ -185,6 +244,14 @@ export default class AddStopPage extends Component{
       this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
       console.log(this.state.routeSuggestions);
     };
+	
+	// testing
+/* 	_onSearchPressed3 = () => {
+      if (this.state.destSearchString === undefined || this.state.destSearchString == "") return;
+	  var stops = [{latitude: 34.0689, longitude: 118.4452}, {latitude: 34.0635, longitude: 118.4455}, {latitude: 33.9416, longitude: 118.4085}]
+	  this.generate_stops(stops, this.state.destSearchString)
+      this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
+    }; */
 
     getUserLocationHandler = () => {
       navigator.geolocation.getCurrentPosition(position => {
