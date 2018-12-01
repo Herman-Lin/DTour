@@ -280,18 +280,18 @@ export default class AddStopPage extends Component{
 
     onAddStop = (r) => {
 
-        this.state.stopsToAdd.push(r);
+        global.stopStorage.addStop(r);
     }
 
     onDeleteStop = (r) => {
-        this.state.stopsToAdd.filter(json => json !== r);
+        global.stopStorage.deleteStopByJSON(r);
     }
 
     onDone = () =>{
 
         if(this.state.stopsToAdd.length !== 0){
-            global.stopStorage.addStop(this.state.stopsToAdd);
-            this.state.currentStops[this.state.currentSearch] = this.state.stopsToAdd;
+//            global.stopStorage.addStop(this.state.stopsToAdd);
+            this.state.stopsToAdd.forEach(function(j){this.state.currentStops[this.state.currentSearch].push(j)} );
         }
         this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1, showGenerateButton: true});
     }
@@ -384,7 +384,6 @@ export default class AddStopPage extends Component{
                   placeholder='Destination'/>
               </View>
             </View>
-
             <View style={styles.container}>
                 <LocationList addStop={this.onAddStop} deleteStop={this.onDeleteStop}
                     clickDone={this.onDone}
@@ -392,6 +391,7 @@ export default class AddStopPage extends Component{
                     addressSuggestions={this.state.addressSuggestions}
                     currentSearch={this.state.currentSearch}
                     toCoord={this.address_suggestion_to_coord}
+                    stopsToAdd={this.state.stopsToAdd}
                 />
             </View>
             {this.state.showGenerateButton && this.state.destinationSet && <TouchableOpacity
