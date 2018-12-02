@@ -428,7 +428,9 @@ export class StopStorage {
            this._start = null; // {Stop} User's route start point
            this._destination = null; // {Stop} User's destination
            this._routes = []; // {Array.Array.Stop} Suggested Routes
-           this.suggester = new LatLongOrAndRouteSuggester(); // Route Suggest Handler
+           this.suggester; 
+           this.greedySuggester = new GreedyLatLongOrAndRouteSuggester();
+           this.latLongOrAndRouteSuggester = new LatLongOrAndRouteSuggester();
          }
          /**
           * Public setter of user's start location
@@ -561,6 +563,14 @@ export class StopStorage {
            // mode = "bicycling";
            // mode = "transit";
            var results = [];
+           
+           if (this.latLongOrAndRouteSuggester.calculate_worst_case_complexity(this._stops) > 30000) {
+             this.suggester = this.GreedyLatLongOrAndRouteSuggester;
+           }
+           else {
+            this.suggester = this.latLongOrAndRouteSuggester;
+           }
+           
            var routes = this.suggester.suggest(this._start, this._stops, this._destination, 10);
            this._stops = routes.slice(1, routes.length - 1);
            var routesLeft = routes.length;

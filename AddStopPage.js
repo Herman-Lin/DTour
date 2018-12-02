@@ -206,15 +206,22 @@ export default class AddStopPage extends Component{
       //console.log('_onSearchTextChanged');
       this.setState({ startSearchString: event.nativeEvent.text, currentSearch: -1 });
       // this.address_search(this.state.startSearchString); New Search Method
+      if (global.stopStorage.getDestination() === null) {
+        var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
+      }
+      else {
+        var coord = global.stopStorage
+          .getAllStops()
+          .push(global.stopStorage.getDestination());
+      }
+
       global.stopRecommender.getStopSuggestion(
         this.state.startSearchString,
-        {
-          latitude: this.state.startLocation.latitude,
-          longitude: this.state.startLocation.longitude
-        },
+        coord,
+        true,
         function(result) {
           this.setState({ results: result });
-        }
+        }.bind(this)
       );
       // console.log('Current: '+this.state.searchString+', Next: '+event.nativeEvent.text);
     };
@@ -227,14 +234,17 @@ export default class AddStopPage extends Component{
         var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
       }
       else {
-        var coord = global.stopStorage.getAllStops();
+        var coord = global.stopStorage
+          .getAllStops()
+          .push(global.stopStorage.getDestination());
       }
       global.stopRecommender.getStopSuggestion(
         this.state.startSearchString,
         coord,
+        true,
         function(result) {
           this.setState({ results: result });
-        }
+        }.bind(this)
       );
       console.log(this.state.routeSuggestions);
     };
@@ -243,7 +253,6 @@ export default class AddStopPage extends Component{
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] === "")
         this.state.stopSearchStrings[index] = event.nativeEvent.text;
       else {
-
         this.setState({
           stopSearchStrings: this.state.stopSearchStrings.map((val, _index) => {
             if (_index === index) return event.nativeEvent.text;
@@ -257,16 +266,19 @@ export default class AddStopPage extends Component{
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       // this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
       if (global.stopStorage.getDestination() === null) {
-        var coord = {"latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude};
+        var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
       }
       else {
-        var coord = global.stopStorage.getAllStops();
+        var coord = global.stopStorage
+          .getAllStops()
+          .push(global.stopStorage.getDestination());
       }
-      global.stopRecommender.getStopSuggestion(this.state.startSearchString,
+      global.stopRecommender.getStopSuggestion(this.state.stopSearchStrings[index],
                                               coord,
+                                              false,
                                               function (result) {
                                                 this.setState({"results": result});
-                                              });
+                                              }.bind(this));
       // this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false,}); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
@@ -283,14 +295,14 @@ export default class AddStopPage extends Component{
       }
       else {
         var coord = global.stopStroage.getAllStops();
-
       }
       global.stopRecommender.getStopSuggestion(
-        this.state.startSearchString,
+        this.state.destSearchString,
         coord,
+        true,
         function(result) {
           this.setState({ results: result });
-        }
+        }.bind(this)
       );
 
       this.setState({ isLoading: true, currentSearch: -2 }); //-2 flag for destination
@@ -436,12 +448,12 @@ export default class AddStopPage extends Component{
               </View>
             </View>
             <View style={styles.container}>
-                <LocationList addStop={this.onAddStop} deleteStop={this.onDeleteStop}
+                <LocationList addStop={this.onAddStop} 
+                    deleteStop={this.onDeleteStop}
                     clickDone={this.onDone}
                     addDest={this.onAddDest} 
                     results={this.state.results}
                     currentSearch={this.state.currentSearch}
-                    // toCoord={this.address_suggestion_to_coord}
                     stopsToAdd={this.state.stopsToAdd}
                 />
             </View>
