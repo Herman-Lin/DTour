@@ -198,7 +198,7 @@ class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
      * `LatLongOrAndRouteSuggester` that uses brute force search in all the search space,
      * this class, `GreedyLatLongOrAndRouteSuggester`, uses a greedy approach.
      * 
-     * 
+     * `max_num` is ignored and only one candidate is returned for now as I think it's sufficient.
      * 
      * The difference is best illustrated in the example below:
      * 
@@ -260,10 +260,9 @@ class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
         for (var i = 0; i < or_list_visited.length; i++) { 
             or_list_visited[i] = false; 
         }
+        
         var num_visited_or_list = 0;
-
         var last_shortest_route = [start_stop, end_stop];
-
         while (num_visited_or_list < m) {
             var cur_or_list_added = null;
             var cur_shortest_dis = 99999999;
@@ -291,10 +290,11 @@ class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
             last_shortest_route = cur_shortest_route;
             or_list_visited[cur_or_list_added] = true;
             num_visited_or_list++;
+            console.log("-----------------------------------------")
         }
 
         // TODO: write methods to detect worst case complexity beforehand 
-        return last_shortest_route;
+        return [last_shortest_route];
     }
 
 
@@ -307,5 +307,20 @@ end = new Stop(2,2);
 
 oars = new GreedyLatLongOrAndRouteSuggester();
 var result = oars.suggest(start, [or_1, or_2], end, 10000);
+console.log("=======================")
+console.log(result);
+console.log("=======================")
+console.log("=======================")
+console.log("=======================")
+
+start = new Stop(0,0);
+B = [new Stop(1,0), new Stop(1,4), new Stop(3,4)];
+C = [new Stop(2,1), new Stop(2,3), new Stop(0,3)];
+D = [new Stop(1,7)];
+E = [new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1)];
+end = new Stop(3,7);
+
+oars = new GreedyLatLongOrAndRouteSuggester();
+var result = oars.suggest(start, [B,C,D,E], end, 10000);
 console.log("=======================")
 console.log(result);
