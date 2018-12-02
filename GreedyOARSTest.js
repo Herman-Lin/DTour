@@ -48,6 +48,23 @@ class OrAndRouteSuggester {
     suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
       throw "OrAndRouteSuggester.suggest() is an abstract method. Call OrAndRouteSuggester's concrete subclass' suggest() instead.";
     }
+
+    /**
+     * Abstract method that calculates worst case runtime complexity of the
+     * subclass strategy. Complexity is simply Big O of number of candidate routes in the search space. 
+     * (complexity of calculating length of candidate route, sorting etc is ignored)
+     * Different subclasses will have different runtime hence return different
+     * Number for this method.
+     * 
+     * This method helps app to determine which concrete Strategy (subclass) to use.
+     *
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+     *
+     * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+     */
+    calculate_worst_case_complexity(or_and_stop_arr) {
+        throw "OrAndRouteSuggester.calculate_worst_case_complexity() is an abstract method. Call OrAndRouteSuggester's concrete subclass' calculate_worst_case_complexity() instead.";
+    }
   
     /**
      * Private method that generates all possible routes.
@@ -177,6 +194,40 @@ class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
     }
 
     /**
+     * Calculates worst case runtime complexity of the
+     * brute force strategy. This method helps app to determine whether to
+     * switch to less time consuming Strategy or not.
+     * 
+     * Run-time analysis:
+     * Assume there are `m` Or-lists.
+     * Each or-list has `ni` length, where 1 <= 1 <= m.
+     * Let `n_max` be `ni` with largest value.
+     * 
+     * Then, (run time is analyzed in terms of number of routes)
+     * Worst case run time of brute force: O(m! * (n1*n2*...*nm)), exponential runtime
+     *
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+     *
+     * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+     */
+    calculate_worst_case_complexity(or_and_stop_arr) {
+        var result = 1;
+        var m = or_and_stop_arr.length;
+
+        // m!
+        for (var i = 1; i <= m; i++) {
+            result = result * i; 
+        }
+
+        // n1*n2*...*nm
+        for (var i = 0; i < or_and_stop_arr.length; i++) {
+            result = result * or_and_stop_arr[i].length;
+        }
+
+        return result;
+    }
+
+    /**
      * Private method Iterating through an array of Stop object and return the sum of distances
      * @param {Array.Stop} route a given route constructed through an array of Stops
      * @returns {Number} Euclidean distance of the route 
@@ -277,8 +328,6 @@ class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
                     var cur_route = last_shortest_route.slice(0);
                     cur_route.splice(cur_route.length-1,0,or_and_stop_arr[i][j]); // insert at second last position
                     var cur_dis = super._calculate_length_of_route(cur_route);
-                    console.log(cur_route);
-                    console.log(cur_dis);
                     if (cur_dis < cur_shortest_dis) {
                         cur_shortest_dis = cur_dis;
                         cur_shortest_route = cur_route;
@@ -292,9 +341,44 @@ class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
             num_visited_or_list++;
             console.log("-----------------------------------------")
         }
-
-        // TODO: write methods to detect worst case complexity beforehand 
+ 
         return [last_shortest_route];
+    }
+
+    /**
+     * Calculates worst case runtime complexity of the
+     * greedy approach. This method can help app to determine whether to
+     * switch strategy or not.
+     * 
+     * Run-time analysis:
+     * Assume there are `m` Or-lists.
+     * Each or-list has `ni` length, where 1 <= 1 <= m.
+     * Let `n_max` be `ni` with largest value.
+     * 
+     * Then, (run time is analyzed in terms of number of routes)
+     * Worst case time of greedy search: O(m^2 * `n_max`), polynomial run time
+     *
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+     *
+     * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+     */
+    calculate_worst_case_complexity(or_and_stop_arr) {
+        var result = 1;
+        var m = or_and_stop_arr.length;
+
+        // m^2
+        result = result * m * m;
+
+        // n_max
+        var n_max = -1;
+        for (var i = 0; i < or_and_stop_arr.length; i++) {
+            if (or_and_stop_arr[i].length > n_max) {
+                n_max = or_and_stop_arr[i].length;
+            }
+        }
+        result = result * n_max;
+
+        return result;
     }
 
 
@@ -322,5 +406,17 @@ end = new Stop(3,7);
 
 oars = new GreedyLatLongOrAndRouteSuggester();
 var result = oars.suggest(start, [B,C,D,E], end, 10000);
-console.log("=======================")
-console.log(result);
+console.log("=======================GREEDY=======================")
+console.log(result[0]);
+console.log(oars._calculate_length_of_route(result[0]));
+console.log(oars.calculate_worst_case_complexity([or_1, or_2]));
+console.log(oars.calculate_worst_case_complexity([B,C,D,E]));
+
+optimal_oars = new LatLongOrAndRouteSuggester();
+var result = optimal_oars.suggest(start, [B,C,D,E], end, 10000);
+console.log("=======================OPTIMAL=======================")
+console.log(result[0]);
+console.log(optimal_oars._calculate_length_of_route(result[0]));
+console.log(optimal_oars.calculate_worst_case_complexity([or_1, or_2]));
+console.log(optimal_oars.calculate_worst_case_complexity([B,C,D,E]));
+
