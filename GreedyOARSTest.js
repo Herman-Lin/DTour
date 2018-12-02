@@ -420,3 +420,14 @@ console.log(optimal_oars._calculate_length_of_route(result[0]));
 console.log(optimal_oars.calculate_worst_case_complexity([or_1, or_2]));
 console.log(optimal_oars.calculate_worst_case_complexity([B,C,D,E]));
 
+
+console.log("=======================(all above are like 0.2s) TESTING HOW TIME CONSUMING BRUTAL IS=======================")
+start = new Stop(0,0);
+B = [new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1), new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1)];
+C = [new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1), new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1)];
+D = [new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1), new Stop(2,6), new Stop(1,5), new Stop(3,1), new Stop(1,1)];
+E = [new Stop(2,6), new Stop(1,5)];
+end = new Stop(3,7);
+console.log(optimal_oars.calculate_worst_case_complexity([B,C,D,E]));
+var result = optimal_oars.suggest(start, [B,C,D,E], end, 10000);
+console.log(optimal_oars._calculate_length_of_route(result[0]));
