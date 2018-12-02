@@ -5,21 +5,6 @@ import {Text, Image, Button, TouchableOpacity} from 'react-native';
 
 class LocationList extends React.Component {
     render() {
-
-        // if(this.props.currentSearch === -1){
-        //     let toCoord =this.props.toCoord;
-        //     return (
-        //         <ScrollView style={{padding: 10}}>
-        //             {this.props.addressSuggestions.map((suggestion, index) => {
-        //                var suggestion_json = JSON.stringify(suggestion);
-        //                return <View style={styles.resultRow} key={index}>
-        //                     <Text style={{padding: 4, textAlign: "left"}} onPress={()=>toCoord(suggestion_json)}>{suggestion.Address}</Text>
-        //                 </View>
-        //             })}
-        //         </ScrollView>
-        //     )
-        // }
-        // else{
         if(this.props.currentSearch >= -2){
             return (
                 <View>

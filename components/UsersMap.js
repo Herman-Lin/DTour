@@ -279,7 +279,7 @@ const usersMap = props => {
                 followsUserLocation={true}
                 showsMyLocationButton={true}
                 style={styles.map}
-                customMapStyle={mapStyle}
+                //customMapStyle={mapStyle}
 
                 >
 
