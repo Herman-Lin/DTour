@@ -279,19 +279,17 @@ export default class AddStopPage extends Component{
     }
 
     onAddStop = (r) => {
-
-        global.stopStorage.addStop(r);
+        this.state.stopsToAdd.push(r);
     }
 
     onDeleteStop = (r) => {
-        global.stopStorage.deleteStopByJSON(r);
+        this.state.stopsToAdd.filter(json => json !== r);
     }
 
     onDone = () =>{
-
         if(this.state.stopsToAdd.length !== 0){
-//            global.stopStorage.addStop(this.state.stopsToAdd);
-            this.state.stopsToAdd.forEach(function(j){this.state.currentStops[this.state.currentSearch].push(j)} );
+            global.stopStorage.addStop(this.state.stopsToAdd);
+            this.state.currentStops[this.state.currentSearch] = this.state.stopsToAdd;
         }
         this.setState({searchEditable: true, stopsToAdd: [], results: [], currentSearch: -1, showGenerateButton: true});
     }
