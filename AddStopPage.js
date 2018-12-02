@@ -51,6 +51,7 @@ export default class AddStopPage extends Component{
 		    recommendedStops: new Set(),
         showGenerateButton: true,
         destinationSet: false,
+        startSearchString: 'Current Location'
       };
 
     }
