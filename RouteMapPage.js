@@ -54,6 +54,8 @@ export default class RouteMapPage extends Component{
 
         suggestions: null,
         suggestionsPolyline: null,
+        suggestionLength: 0,
+        suggestionIndex: 0,
         carouselInformation: [],
         focusRegion: null,
 
@@ -62,6 +64,7 @@ export default class RouteMapPage extends Component{
       this.mergeLot = this.mergeLot.bind(this);
       this.carouselRender = this.carouselRender.bind(this);
       this.focusRegion = this.focusRegion.bind(this);
+      this.incrementSuggestionIndex = this.incrementSuggestionIndex.bind(this);
     }
 
 
@@ -95,13 +98,26 @@ export default class RouteMapPage extends Component{
 
 
     getSuggestionCallback(suggestions) {
-      this.setState({
-        suggestions: suggestions,
-        suggestionsPolyline: suggestions[0].polyline,
 
-      });
 
-      let points = Polyline.decode(suggestions[0].polyline);
+      if (this.state.suggestions == null){
+        console.log(this.state.suggestionIndex)
+        console.log(suggestions)
+        this.setState({
+          suggestions: suggestions,
+          suggestionsPolyline: suggestions[this.state.suggestionIndex].polyline,
+          suggestionLength: suggestions.length,
+        });
+        }
+  
+        else {
+          this.setState({
+            suggestionsPolyline: this.state.suggestions[this.state.suggestionIndex].polyline,
+            suggestionLength: this.state.suggestions.length,
+          });
+        }
+
+      let points = Polyline.decode(this.state.suggestions[this.state.suggestionIndex].polyline);
 
       let coords = points.map((point, index) => {
           return  {
@@ -114,7 +130,7 @@ export default class RouteMapPage extends Component{
         coords: coords,
       })
 
-      let stops = suggestions[0].coordinates;
+      let stops = this.state.suggestions[this.state.suggestionIndex].coordinates;
 
 
       let carousel = []
@@ -141,9 +157,9 @@ export default class RouteMapPage extends Component{
         wayPoints: wayPoints,
         carouselInformation: carousel,
       });
-      console.log(this.state.carouselInformation);
+      //console.log(this.state.carouselInformation);
 
-      console.log(suggestions[0]);
+      //console.log(suggestions[0]);
 
     };
 
@@ -180,6 +196,28 @@ export default class RouteMapPage extends Component{
       console.log(this.state.focusRegion)
     };
 
+      //onPress method for generating new route
+      incrementSuggestionIndex() {
+        console.log(this.state.suggestionLength);
+        let index = this.state.suggestionIndex;
+        let length = this.state.suggestionLength;
+        if (index < (length - 1)){
+          this.setState({
+            suggestionIndex: index + 1,
+            
+          });
+          this.mergeLot();
+        }
+  
+        else{
+          this.setState({
+            suggestionIndex: 0,
+          })
+          this.mergeLot();
+        }
+  
+      }
+
 
 
 
@@ -205,6 +243,17 @@ export default class RouteMapPage extends Component{
                   }}>
                 <Icon name={"chevron-left"}  size={40} color="black" />
               </TouchableOpacity>
+              <TouchableOpacity
+                    style={styles.generateRouteButton}
+                    onPress={() => {
+                      this.incrementSuggestionIndex();
+                      console.log(this.state.suggestionIndex);
+    
+                    }}
+                    underlayColor='#fff'>
+                  <Icon name={"cached"}  size={40} color="#000" />
+                
+                </TouchableOpacity>
               <Text style={styles.headerTitle}>Your Trip</Text>
             </View>
             <View style={styles.cardContainer}>
@@ -251,6 +300,21 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 18,
         position: 'absolute',
+      },
+      generateRouteButton: {
+        marginTop: 30,
+        marginLeft: '87%',
+        marginRight: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
+        // backgroundColor:'#000',
+        // opacity: 0.4,
+        // borderRadius: 100,
+        position: 'absolute',
+        // shadowOffset: { width: 2, height: 5 },
+        // shadowOpacity: 100,
+        // shadowRadius: 3,
+       
       },
       backButton:{
         marginTop: 10,
