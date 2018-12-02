@@ -47,9 +47,10 @@ export default class AddStopPage extends Component{
         stopList: [{}],
         searchEditable: true,
         stopsToAdd: [], // for multiselecting stops to be pushed to into stopStorage
-		recommendedStops: new Set(),
+		    recommendedStops: new Set(),
         showGenerateButton: true,
         destinationSet: false,
+        startSearchString: 'Current Location'
       };
 
     }

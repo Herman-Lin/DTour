@@ -205,7 +205,7 @@ const usersMap = props => {
     let region = props.userLocation;
     let cards = null;
     let displayRoute = 0;
-  
+
 
     this.state = {
         markers : props.wayPoints,
@@ -215,14 +215,14 @@ const usersMap = props => {
         displayRoute: 0,
     };
 
-    
+
     //if (props.userLocation) {
     //    userLocationMarker = <MapView.Marker coordinate={props.userLocation} pinColor="gold" />
     //}
 
     if (props.destinationLocation) {
         userDestinationMarker = <MapView.Marker coordinate={props.destinationLocation} />;
-       
+
     }
 
     if (props.displayRoute == 1) {   //display route only once trip has been planned. Initially app has no route displayed.
@@ -231,16 +231,16 @@ const usersMap = props => {
     }
 
     if (props.wayPoints) {
-      
+
 
       //allows for rendering of multiple markers
-      wayPointMarkers = this.state.markers.map(marker => (
-        <MapView.Marker 
+      wayPointMarkers = this.state.markers.map((marker, index) => (
+        <MapView.Marker
           coordinate={marker}
-          
+          key={index}
         />
       ))
-        
+
         //wayPointMarkers = <MapView.Marker coordinate={this.state.markers} pinColor="red" />
     }
 
@@ -249,23 +249,23 @@ const usersMap = props => {
       let duration = .5
      // _mapView.animateToRegion(region, duration)
     }
-   
-   
+
+
     console.log(props.coordinates)
     //this.setState({
      //   coords: props.coordinates
     //});
 
-  
 
-    
+
+
    //{this.state.markers.map(marker =>(
     //<MapView.Marker coordinate={{longitude: marker.longitude, latitude: marker.latitude}} />
     //))}
     return (
       <View>
         <View style={styles.mapContainer}>
-            <MapView 
+            <MapView
                 initialRegion = {{
                     latitude: 37.78825,
                     longitude: -122.4324,
@@ -274,20 +274,20 @@ const usersMap = props => {
                   }}
 
                 region={region}
-                
+
                 showsUserLocation={true}
                 followsUserLocation={true}
                 showsMyLocationButton={true}
                 style={styles.map}
                 customMapStyle={mapStyle}
-               
-                > 
-                
-                
-             
-                
+
+                >
+
+
+
+
                {routePolyline}
-                
+
                 {wayPointMarkers}
                 {userLocationMarker}
                 {userDestinationMarker}
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
         height: 700,
         justifyContent: 'center',
         alignItems: 'center',
-        
+
     },
     map: {
         width: '100%',
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     marker: {
         color: '#FF7F50',
     },
-   
+
 
 
 });

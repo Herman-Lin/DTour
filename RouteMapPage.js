@@ -35,9 +35,9 @@ export default class RouteMapPage extends Component{
       super(props);
       this.getUserLocationHandler(); //get user location at startup
       this.state = {
-        
+
         isLoading: false,
-     
+
         results: [],
         addressSuggestions: [],
         userLocation: null,//{latitude: 34.0689, longitude: -118.445},
@@ -56,7 +56,7 @@ export default class RouteMapPage extends Component{
         suggestionsPolyline: null,
         carouselInformation: [],
         focusRegion: null,
-        
+
       };
       this.getSuggestionCallback = this.getSuggestionCallback.bind(this);
       this.mergeLot = this.mergeLot.bind(this);
@@ -85,11 +85,11 @@ export default class RouteMapPage extends Component{
             longitude: -119.000,
           }
         });
-        
+
         if (this.state.displayRoute == 1){
           this.mergeLot();
         }
-      
+
       }, err => console.log(err));
     }
 
@@ -98,11 +98,11 @@ export default class RouteMapPage extends Component{
       this.setState({
         suggestions: suggestions,
         suggestionsPolyline: suggestions[0].polyline,
-       
+
       });
 
       let points = Polyline.decode(suggestions[0].polyline);
-      
+
       let coords = points.map((point, index) => {
           return  {
               latitude : point[0],
@@ -115,8 +115,8 @@ export default class RouteMapPage extends Component{
       })
 
       let stops = suggestions[0].coordinates;
-      
-     
+
+
       let carousel = []
       let i=0
       for (i=0; i < stops.length; i++){
@@ -136,13 +136,13 @@ export default class RouteMapPage extends Component{
 
           }
       });
-     
+
       this.setState({
         wayPoints: wayPoints,
         carouselInformation: carousel,
       });
       console.log(this.state.carouselInformation);
-      
+
       console.log(suggestions[0]);
 
     };
@@ -156,7 +156,7 @@ export default class RouteMapPage extends Component{
       console.log(start, destination);
     }
 
-    
+
     carouselRender({item, index}) {
         return (
             <View style={styles.card}>
@@ -164,7 +164,7 @@ export default class RouteMapPage extends Component{
                 <Image style={styles.image} source={{uri: item.image_url}}/>
             </View>
         );
-        
+
     };
 
 
@@ -178,47 +178,44 @@ export default class RouteMapPage extends Component{
       })
 
       console.log(this.state.focusRegion)
-    };   
-    
-   
+    };
 
-  
+
+
+
 
     render(){
 
-        
+
         return (
           <View>
             <View>
               <UsersMap userLocation={this.state.userLocation}
-                        destinationLocation={this.state.userDestination} 
-                        coordinates={this.state.coords} 
-                        displayRoute={this.state.displayRoute} 
+                        destinationLocation={this.state.userDestination}
+                        coordinates={this.state.coords}
+                        displayRoute={this.state.displayRoute}
                         wayPoints={this.state.wayPoints}
                         focusRegion={this.state.focusRegion}/>
-            </View> 
-                
-
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => {
-                      
-                      this.props.navigation.navigate('AddStop'); //navigate back to Home screen 
-                    }}
-                    underlayColor='#fff'>
-                  <Icon name={"chevron-left"}  size={40} color="#fff" />
-                
-                </TouchableOpacity>
-            
+            </View>
+            <View style={styles.header}>
+              <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => {
+                    this.props.navigation.navigate('AddStop'); //navigate back to Home screen
+                  }}>
+                <Icon name={"chevron-left"}  size={40} color="black" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Your Trip</Text>
+            </View>
             <View style={styles.cardContainer}>
-              <Carousel 
-                  data={this.state.carouselInformation} 
-                  windowSize={1} 
+              <Carousel
+                  data={this.state.carouselInformation}
+                  windowSize={1}
                   sliderWidth={windowWidth}
-                  itemHeight={windowHeight * .3} 
-                  itemWidth={windowWidth *.9} 
-                  renderItem={this.carouselRender} 
-                  layout={"stack"} 
+                  itemHeight={windowHeight * .3}
+                  itemWidth={windowWidth *.9}
+                  renderItem={this.carouselRender}
+                  layout={"stack"}
                   onScroll={this.focusRegion}
                   ref={'carousel'}/>
             </View>
@@ -245,39 +242,44 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         zIndex: 100
       },
-      
+      header: {
+        flexDirection: 'row',
+      },
+      headerTitle: {
+        marginLeft: 145,
+        marginTop: 23,
+        fontWeight: 'bold',
+        fontSize: 18,
+        position: 'absolute',
+      },
       backButton:{
-        
-        marginTop: 30,
-        // marginLeft: 115,
-        marginLeft: '3%',
+        marginTop: 10,
+        marginLeft: 10,
         paddingTop: 5,
         paddingBottom: 5,
-        backgroundColor:'#000',
-        opacity: 0.4,
-        borderRadius: 100,
+        // backgroundColor:'#000',
+        // opacity: 0.4,
+        // borderRadius: 100,
         position: 'absolute',
-        shadowOffset: { width: 2, height: 5 },
-        shadowOpacity: 100,
-        shadowRadius: 3,
+        // shadowOffset: { width: 2, height: 5 },
+        // shadowOpacity: 100,
+        // shadowRadius: 3,
       },
       backButtonText:{
-        color:'#000',
+        color: 'black',
+        // color:'#000',
         fontSize: 17,
         fontWeight: 'bold',
         textAlign:'center',
         paddingLeft : 10,
         paddingRight : 10,
       },
-  
       map: {
         width: '100%',
         height: '100%',
         alignItems: 'center'
       },
-
       card: {
-        
         height: windowHeight* .25,
         width: windowWidth*.7,
         borderRadius: 6,
@@ -290,7 +292,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: windowHeight *.4,
         paddingVertical: 20,
-        
         shadowColor: '#000',
         shadowOffset: { width: 2, height: 5 },
         shadowOpacity: 0.5,
@@ -303,14 +304,19 @@ const styles = StyleSheet.create({
         left: 0,
         bottom: 0,
         right: 0,
-        opacity: 0.5,
+        opacity: 0.9,
       },
-      
       cardText: {
         color: '#FFF',
+        fontWeight: 'bold',
         fontSize: 20,
-        marginTop: 110,
+        marginTop: 130,
         marginLeft: 10,
+        zIndex: 10,
+        borderColor: 'black',
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 10
       }
 
     });
