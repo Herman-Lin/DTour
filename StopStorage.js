@@ -83,6 +83,23 @@ export class OrAndRouteSuggester {
   }
 
   /**
+     * Abstract method that calculates worst case runtime complexity of the
+     * subclass strategy. Complexity is simply Big O of number of candidate routes in the search space. 
+     * (complexity of calculating length of candidate route, sorting etc is ignored)
+     * Different subclasses will have different runtime hence return different
+     * Number for this method.
+     * 
+     * This method helps app to determine which concrete Strategy (subclass) to use.
+     *
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+     *
+     * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+     */
+    calculate_worst_case_complexity(or_and_stop_arr) {
+      throw "OrAndRouteSuggester.calculate_worst_case_complexity() is an abstract method. Call OrAndRouteSuggester's concrete subclass' calculate_worst_case_complexity() instead.";
+  }
+
+  /**
    * Private method that generates all possible routes.
    *
    * @param  {Stop} start_stop - starting Stop
@@ -210,6 +227,40 @@ export class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
     }
 
     /**
+     * Calculates worst case runtime complexity of the
+     * brute force strategy. This method helps app to determine whether to
+     * switch to less time consuming Strategy or not.
+     * 
+     * Run-time analysis:
+     * Assume there are `m` Or-lists.
+     * Each or-list has `ni` length, where 1 <= 1 <= m.
+     * Let `n_max` be `ni` with largest value.
+     * 
+     * Then, (run time is analyzed in terms of number of routes)
+     * Worst case run time of brute force: O(m! * (n1*n2*...*nm)), exponential runtime
+     *
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+     *
+     * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+     */
+    calculate_worst_case_complexity(or_and_stop_arr) {
+      var result = 1;
+      var m = or_and_stop_arr.length;
+
+      // m!
+      for (var i = 1; i <= m; i++) {
+          result = result * i; 
+      }
+
+      // n1*n2*...*nm
+      for (var i = 0; i < or_and_stop_arr.length; i++) {
+          result = result * or_and_stop_arr[i].length;
+      }
+
+      return result;
+  }
+
+    /**
      * Private method Iterating through an array of Stop object and return the sum of distances
      * @param {Array.Stop} route a given route constructed through an array of Stops
      * @returns {Number} Euclidean distance of the route 
@@ -222,6 +273,149 @@ export class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
         return total_len
     }
 }
+
+export class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
+  /**
+   * Public method suggest() calculates Euclidean distance among an array of
+   * latitude and longitude coordinates. Different from 
+   * `LatLongOrAndRouteSuggester` that uses brute force search in all the search space,
+   * this class, `GreedyLatLongOrAndRouteSuggester`, uses a greedy approach.
+   * 
+   * `max_num` is ignored and only one candidate is returned for now as I think it's sufficient.
+   * 
+   * The difference is best illustrated in the example below:
+   * 
+   * Start: A(0,0)
+   * Or-1: B1(1,0), B2(1,1)
+   * Or-2: C1(2,0), C2(2,1)
+   * End: D(2,2)
+   * 
+   * Brute Force Search:
+   * 1. Generate all possible routes and calculate lat-long distances:
+   *     [A-B1-C1-D] with distance 4
+   *     [A-B2-C1-D] with distance 4.83
+   *     [A-B1-C2-D] with distance 3.41 <-- shortest!
+   *     [A-B2-C2-D] with distance 3.41 <-- shortest!
+   *     [A-C1-B1-D] with distance 5.24
+   *     [A-C1-B2-D] with distance 4.83
+   *     [A-C2-B1-D] with distance 5.89
+   *     [A-C2-B2-D] with distance 4.65
+   * 2. Choose the ones with shortest lat-long distance: [A-B1-C2-D] or [A-B2-C2-D]
+   * 
+   * Greedy Search:
+   * 1. Try all possible stops and select the best one to add (Start and End are fixed)
+   *     [A-B1-D] with distance 3.24
+   *     [A-B2-D] with distance 2.83 <-- shortest!
+   *     [A-C1-D] with distance 4
+   *     [A-C2-D] with distance 3.24
+   * 2. Choose the best one (Greedy!) for now: 
+   * 3. Repeat step 1 to add as second detour stop: [A-B2-D]
+   *     [A-B2-C1-D] with distance 4.83
+   *     [A-B2-C2-D] with distance 3.41 <-- shortest!
+   * 4. So this algorithm will think [A-B2-C2-D] is the shortest one.
+   * 
+   * The brute force search is optimal if lat-long is perfect approximation of real world travelling.
+   * Greedy search is obviously not optimal.
+   * 
+   * But greedy search has much shorter complexity.
+   * 
+   * Run-time analysis:
+   * Assume there are `m` Or-lists.
+   * Each or-list has `ni` length, where 1 <= 1 <= m.
+   * Let `n_max` be `ni` with largest value.
+   * 
+   * Then, (run time is analyzed in terms of number of routes)
+   * Worst case run time of brute force: O(m! * (n1*n2*...*nm)), exponential runtime
+   * Worst case time of greedy search: O(m^2 * `n_max`), polynomial run time!
+   * 
+   *
+   * @param {Stop} start_stop user pre-selected start of route 
+   * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category 
+   * @param {Stop} end_stop user pre-selected destination 
+   * @param {Number} max_num the number of route candidates to be returned
+   * 
+   * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
+   */
+  suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
+      var m = or_and_stop_arr.length;
+
+      var or_list_visited = new Array(m);
+      for (var i = 0; i < or_list_visited.length; i++) { 
+          or_list_visited[i] = false; 
+      }
+      
+      var num_visited_or_list = 0;
+      var last_shortest_route = [start_stop, end_stop];
+      while (num_visited_or_list < m) {
+          var cur_or_list_added = null;
+          var cur_shortest_dis = 99999999;
+          var cur_shortest_route = null;
+
+          for (var i = 0; i < m; i++) {
+              if (or_list_visited[i]) {
+                  continue;
+              }
+
+              for (var j = 0; j < or_and_stop_arr[i].length; j++) {
+                  var cur_route = last_shortest_route.slice(0);
+                  cur_route.splice(cur_route.length-1,0,or_and_stop_arr[i][j]); // insert at second last position
+                  var cur_dis = super._calculate_length_of_route(cur_route);
+                  if (cur_dis < cur_shortest_dis) {
+                      cur_shortest_dis = cur_dis;
+                      cur_shortest_route = cur_route;
+                      cur_or_list_added = i;
+                  }
+              }
+          }
+
+          last_shortest_route = cur_shortest_route;
+          or_list_visited[cur_or_list_added] = true;
+          num_visited_or_list++;
+          console.log("-----------------------------------------")
+      }
+
+      return [last_shortest_route];
+  }
+
+  /**
+   * Calculates worst case runtime complexity of the
+   * greedy approach. This method can help app to determine whether to
+   * switch strategy or not.
+   * 
+   * Run-time analysis:
+   * Assume there are `m` Or-lists.
+   * Each or-list has `ni` length, where 1 <= 1 <= m.
+   * Let `n_max` be `ni` with largest value.
+   * 
+   * Then, (run time is analyzed in terms of number of routes)
+   * Worst case time of greedy search: O(m^2 * `n_max`), polynomial run time
+   *
+   * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category
+   *
+   * @returns {Number} - Complexity is simply Big O of number of candidate routes in the search space. 
+   */
+  calculate_worst_case_complexity(or_and_stop_arr) {
+      var result = 1;
+      var m = or_and_stop_arr.length;
+
+      // m^2
+      result = result * m * m;
+
+      // n_max
+      var n_max = -1;
+      for (var i = 0; i < or_and_stop_arr.length; i++) {
+          if (or_and_stop_arr[i].length > n_max) {
+              n_max = or_and_stop_arr[i].length;
+          }
+      }
+      result = result * n_max;
+
+      return result;
+  }
+
+
+}
+
 
 /**
  * StopStorage is class that facilitates the UI to retrieve current information about the postential
