@@ -91,7 +91,7 @@ export default class SearchPage extends Component{
 
       let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
       let respJson = await resp.json();
-      console.log(respJson);
+      // console.log(respJson);
       let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
       let coords = points.map((point, index) => {
           return  {
@@ -100,7 +100,7 @@ export default class SearchPage extends Component{
           }
       })
 
-      console.log(coords)
+      // console.log(coords)
       this.setState({coords: coords})
       return coords
     } catch(error) {

@@ -30,12 +30,12 @@ export default class AddStopPage extends Component{
       //this.stopStorage = new StopStorage();
       this.getUserLocationHandler();
 
-      // Below are examples of how to use stopStorage interface:
-      this.yourCallBackFunctionHere = function (suggestedRoutes) {
-        // Insert your logic here
-        // un-set waiting screen set
-        console.log(suggestedRoutes);
-      }
+      // // Below are examples of how to use stopStorage interface:
+      // this.yourCallBackFunctionHere = function (suggestedRoutes) {
+      //   // Insert your logic here
+      //   // un-set waiting screen set
+      //   console.log(suggestedRoutes);
+      // }
 
       this.state = {
         isLoading: false,
@@ -213,7 +213,7 @@ export default class AddStopPage extends Component{
       else {
         var coord = global.stopStorage
           .getAllStops()
-          .push(global.stopStorage.getDestination());
+          .concat(global.stopStorage.getDestination());
       }
 
       global.stopRecommender.getStopSuggestion(
@@ -237,7 +237,7 @@ export default class AddStopPage extends Component{
       else {
         var coord = global.stopStorage
           .getAllStops()
-          .push(global.stopStorage.getDestination());
+          .concat(global.stopStorage.getDestination());
       }
       global.stopRecommender.getStopSuggestion(
         this.state.startSearchString,
@@ -266,14 +266,17 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       // this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
+      var coord = "";
       if (global.stopStorage.getDestination() === null) {
-        var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
+        coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
       }
       else {
-        var coord = global.stopStorage
+        coord = global.stopStorage
           .getAllStops()
-          .push(global.stopStorage.getDestination());
+          .concat(global.stopStorage.getDestination());
       }
+      console.log("AAAA");
+      console.log(coord);
       global.stopRecommender.getStopSuggestion(this.state.stopSearchStrings[index],
                                               coord,
                                               false,
