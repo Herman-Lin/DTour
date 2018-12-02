@@ -135,13 +135,70 @@ class OrAndRouteSuggester {
     }
 }
 
+/**
+ * LatLongOrAndRouteSuggester is an implementation of the abstract
+ * strategy OrAndRouteSuggester.
+ */
+class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
+    /**
+     * Public method suggest() calculates Euclidean distance among an array of
+     * latitude and longitude coordinates. This method utilizes a crude brute
+     * force approach by iterating through ALL possible routes, and returns
+     * `max_num` number of routes to suggest.
+     *
+     * @param {Stop} start_stop user pre-selected start of route 
+     * @param {Array.Array.Stop} or_and_stop_arr the list of all candidate stops grouped by category 
+     * @param {Stop} end_stop user pre-selected destination 
+     * @param {Number} max_num the number of route candidates to be returned
+     * 
+     * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
+     */
+    suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
+        var all_possible_routes = super._get_all_possible_routes(start_stop, or_and_stop_arr, end_stop);
 
-class GreedyLatLongOrAndRouteSuggester extends OrAndRouteSuggester {
+        var all_possible_dis = new Array(all_possible_routes.length)
+        for (var i = 0; i < all_possible_dis.length; i++) {
+            all_possible_dis[i] = this._calculate_length_of_route(all_possible_routes[i]);
+        }
+
+        var indices = new Array(all_possible_routes.length)
+        for (var i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
+
+        indices.sort(function (a, b) { return all_possible_dis[a] < all_possible_dis[b] ? -1 : all_possible_dis[a] > all_possible_dis[b] ? 1 : 0; })
+
+        var suggested_routes_sorted_by_dis = new Array(Math.min(all_possible_routes.length, max_num));
+        for (var i = 0; i < indices.length && i < max_num; i++) {
+            suggested_routes_sorted_by_dis[i] = all_possible_routes[indices[i]];
+        }
+
+        return suggested_routes_sorted_by_dis;
+    }
+
+    /**
+     * Private method Iterating through an array of Stop object and return the sum of distances
+     * @param {Array.Stop} route a given route constructed through an array of Stops
+     * @returns {Number} Euclidean distance of the route 
+     */
+    _calculate_length_of_route(route) {
+        var total_len = 0;
+        for (var i = 0; i < route.length - 1; i++) {
+            total_len += route[i].lat_long_distance(route[i + 1])
+        }
+        return total_len
+    }
+}
+
+
+class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
     /**
      * Public method suggest() calculates Euclidean distance among an array of
      * latitude and longitude coordinates. Different from 
      * `LatLongOrAndRouteSuggester` that uses brute force search in all the search space,
      * this class, `GreedyLatLongOrAndRouteSuggester`, uses a greedy approach.
+     * 
+     * 
      * 
      * The difference is best illustrated in the example below:
      * 
@@ -164,16 +221,15 @@ class GreedyLatLongOrAndRouteSuggester extends OrAndRouteSuggester {
      * 
      * Greedy Search:
      * 1. Try all possible stops and select the best one to add (Start and End are fixed)
-     *     [A-B1-D] with distance 3.24 <-- shortest!
-     *     [A-B2-D] with distance 2.83
+     *     [A-B1-D] with distance 3.24
+     *     [A-B2-D] with distance 2.83 <-- shortest!
      *     [A-C1-D] with distance 4
-     *     [A-C2-D] with distance 3.24 <-- shortest!
-     * 2. Choose the best one (Greedy!) for now: [A-B1-D] or [A-C2-D]
-     * Let's pick [A-B1-D] (if multiple routes are shortest, pick one randomly)
-     * 3. Repeat step 1 to add as second detour stop:
-     *     [A-B1-C1-D] with distance 4
-     *     [A-B1-C2-D] with distance 3.41 <-- shortest!
-     * 4. So this algorithm will think [A-B1-C2-D] is the shortest one.
+     *     [A-C2-D] with distance 3.24
+     * 2. Choose the best one (Greedy!) for now: 
+     * 3. Repeat step 1 to add as second detour stop: [A-B2-D]
+     *     [A-B2-C1-D] with distance 4.83
+     *     [A-B2-C2-D] with distance 3.41 <-- shortest!
+     * 4. So this algorithm will think [A-B2-C2-D] is the shortest one.
      * 
      * The brute force search is optimal if lat-long is perfect approximation of real world travelling.
      * Greedy search is obviously not optimal.
@@ -198,9 +254,50 @@ class GreedyLatLongOrAndRouteSuggester extends OrAndRouteSuggester {
      * @returns {Array.Array.Stop} - each Array.Stop in this var is a SUGGESTED route
      */
     suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
-        // TODO
-        return "not done";
+        var m = or_and_stop_arr.length;
+
+        var or_list_visited = new Array(m);
+        for (var i = 0; i < or_list_visited.length; i++) { 
+            or_list_visited[i] = false; 
+        }
+        var num_visited_or_list = 0;
+
+        var last_shortest_route = [start_stop, end_stop];
+
+        while (num_visited_or_list < m) {
+            var cur_or_list_added = null;
+            var cur_shortest_dis = 99999999;
+            var cur_shortest_route = null;
+
+            for (var i = 0; i < m; i++) {
+                if (or_list_visited[i]) {
+                    continue;
+                }
+
+                for (var j = 0; j < or_and_stop_arr[i].length; j++) {
+                    var cur_route = last_shortest_route.slice(0);
+                    cur_route.splice(cur_route.length-1,0,or_and_stop_arr[i][j]); // insert at second last position
+                    var cur_dis = super._calculate_length_of_route(cur_route);
+                    console.log(cur_route);
+                    console.log(cur_dis);
+                    if (cur_dis < cur_shortest_dis) {
+                        cur_shortest_dis = cur_dis;
+                        cur_shortest_route = cur_route;
+                        cur_or_list_added = i;
+                    }
+                }
+            }
+
+            last_shortest_route = cur_shortest_route;
+            or_list_visited[cur_or_list_added] = true;
+            num_visited_or_list++;
+        }
+
+        // TODO: write methods to detect worst case complexity beforehand 
+        return last_shortest_route;
     }
+
+
 }
 
 start = new Stop(0,0);
@@ -210,4 +307,5 @@ end = new Stop(2,2);
 
 oars = new GreedyLatLongOrAndRouteSuggester();
 var result = oars.suggest(start, [or_1, or_2], end, 10000);
+console.log("=======================")
 console.log(result);
