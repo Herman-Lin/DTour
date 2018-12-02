@@ -57,7 +57,7 @@ input: onPress() for Add button --> expected output: function has addDisabled fa
                                                      function has addDisabled true and deleteDisabled false after press
 
 ```
-## Testing scenario 5. LocationList
+## Testing scenario 6. LocationList
 Test whether it displays a list of Yelp results or Google Address results
 
 ```
