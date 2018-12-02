@@ -207,13 +207,11 @@ export default class AddStopPage extends Component{
       //console.log('_onSearchTextChanged');
       this.setState({ startSearchString: event.nativeEvent.text, currentSearch: -1 });
       // this.address_search(this.state.startSearchString); New Search Method
-      if (global.stopStorage.getDestination() === null) {
-        var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
-      }
-      else {
-        var coord = global.stopStorage
+      var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
+      if (global.stopStorage.getDestination() !== null) {
+        coord = [coord].concat(global.stopStorage
           .getAllStops()
-          .concat(global.stopStorage.getDestination());
+          .concat(global.stopStorage.getDestination()));
       }
 
       global.stopRecommender.getStopSuggestion(
@@ -231,13 +229,11 @@ export default class AddStopPage extends Component{
       if (this.state.startSearchString === undefined || this.state.startSearchString == "") return;
         // this.setState({ isLoading: true, currentSearch: -1 });
         // this.address_search(this.state.startSearchString);     // Updated Search Method
-      if (global.stopStorage.getDestination() === null) {
-        var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
-      }
-      else {
-        var coord = global.stopStorage
+      var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
+      if (global.stopStorage.getDestination() !== null) {
+        coord = [coord].concat(global.stopStorage
           .getAllStops()
-          .concat(global.stopStorage.getDestination());
+          .concat(global.stopStorage.getDestination()));
       }
       global.stopRecommender.getStopSuggestion(
         this.state.startSearchString,
@@ -266,17 +262,10 @@ export default class AddStopPage extends Component{
     _onSearchPressed2 = (index) => {
       if (this.state.stopSearchStrings[index] === undefined || this.state.stopSearchStrings[index] == "") return;
       // this.yelp_search(this.state.stopSearchStrings[index], this.state.startLocation.latitude, this.state.startLocation.longitude);
-      var coord = "";
-      if (global.stopStorage.getDestination() === null) {
-        coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
+      var coord = { latitude: this.state.startLocation.latitude, longitude: this.state.startLocation.longitude };
+      if (global.stopStorage.getDestination() !== null) {
+        coord = [coord].concat(global.stopStorage.getDestination());
       }
-      else {
-        coord = global.stopStorage
-          .getAllStops()
-          .concat(global.stopStorage.getDestination());
-      }
-      console.log("AAAA");
-      console.log(coord);
       global.stopRecommender.getStopSuggestion(this.state.stopSearchStrings[index],
                                               coord,
                                               false,

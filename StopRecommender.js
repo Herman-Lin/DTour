@@ -71,6 +71,8 @@ export class StopRecommender {
              for (var i = 1; i < stops.length; i++) {
                var stop1 = stops[i - 1];
                var stop2 = stops[i];
+               console.log("LOG2 - " + JSON.stringify(stops));
+               console.log("----------");
                // Haversine Formula
                var phi1 = (parseFloat(stop1.latitude) * Math.PI) / 180;
                var phi2 = (parseFloat(stop2.latitude) * Math.PI) / 180;
@@ -88,10 +90,16 @@ export class StopRecommender {
                for (var j = 0; j < numSearches; j++) {
                  searchQueue.push(new YelpSearchParameter(searchStr, stop1.latitude + dx * j, stop1.longitude + dy * j, this.radius));
                }
+               //console.log("LOG2 - " + stop1.longitude);
+               //console.log("LOG3 - " + stop2.latitude);
+               //console.log("LOG4 - " + stop2.longitude);
+               //console.log("LOG5 - " + dx);
+               //console.log("LOG6 - " + dy);
                searchQueue.push(new YelpSearchParameter(searchStr, stop2.latitude, stop2.longitude, this.radius));
              }
              var searchLeft = searchQueue.length;
              var suggestionSet = new Set();
+             console.log(searchQueue);
              searchQueue.forEach(function(yelpSearchParam) {
                const Http = new XMLHttpRequest();
                var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(yelpSearchParam.term) + "&latitude=" + String(yelpSearchParam.latitude) + "&longitude=" + String(yelpSearchParam.longitude) + "&sort_by=best_match";
@@ -112,7 +120,9 @@ export class StopRecommender {
                      suggestionSet.add(result_json);
                    });
                    searchLeft--;
-                   if (searchLeft == 0) {
+                   console.log("BBBB");
+                   if (searchLeft === 0) {
+                     console.log("CCCC");
                      callback(Array.from(suggestionSet));
                    }
                  }
