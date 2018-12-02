@@ -295,7 +295,7 @@ export default class AddStopPage extends Component{
         var coord = { "latitude": this.state.startLocation.latitude, "longitude": this.state.startLocation.longitude };
       }
       else {
-        var coord = global.stopStroage.getAllStops();
+        var coord = global.stopStorage.getAllStops();
       }
       global.stopRecommender.getStopSuggestion(
         this.state.destSearchString,

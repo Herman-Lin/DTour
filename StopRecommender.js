@@ -69,8 +69,8 @@ export class StopRecommender {
            } else if (stops.constructor === Array && stops.length > 1) {
              var searchQueue = [];
              for (var i = 1; i < stops.length; i++) {
-               var stop1 = JSON.parse(stops[i - 1]);
-               var stop2 = JSON.parse(stops[i]);
+               var stop1 = stops[i - 1];
+               var stop2 = stops[i];
                // Haversine Formula
                var phi1 = (parseFloat(stop1.latitude) * Math.PI) / 180;
                var phi2 = (parseFloat(stop2.latitude) * Math.PI) / 180;
