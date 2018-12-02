@@ -47,3 +47,22 @@ input: calls setDestination with JSON. --> expected output: private end coordina
 input: calls addStop with coordinate. --> expected output: private stop coordinate added
 input: calls addStop with JSON. --> expected output: private stop coordinate added
 ```
+
+## Testing scenario 5. AddDeleteStopButton
+Test whether the buttons will call the correct functions, checks if it is in the correct state after button is pressed for frontend
+
+```
+input: onPress() for Add button, onPress() for Delete button --> expected output: function on Add called once, function on Delete called once
+input: onPress() for Add button --> expected output: function has addDisabled false and deleteDisabled true before press,
+                                                     function has addDisabled true and deleteDisabled false after press
+
+```
+## Testing scenario 5. LocationList
+Test whether it displays a list of Yelp results or Google Address results
+
+```
+input: search on start, one Google Address result in addressSuggestion --> expected output: has 0 LocationSuggestion elements
+input: search on stop, one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search on destination, one Yelp result in results --> expected output: has 1 LocationSuggestion element
+
+```
