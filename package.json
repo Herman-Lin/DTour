@@ -8,8 +8,10 @@
   },
   "dependencies": {
     "@mapbox/polyline": "^1.0.0",
+    "jest-enzyme": "^7.0.1",
     "jsdoc": "^3.5.5",
-    "react": "16.6.0-alpha.8af6728",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "react-native": "0.57.4",
     "react-native-elements": "^0.19.1",
     "react-native-maps": "^0.22.1",
@@ -20,12 +22,21 @@
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.7.0",
+    "enzyme-react-16-adapter-setup": "^0.1.0",
+    "enzyme-to-json": "^3.3.4",
     "jest": "^23.6.0",
     "metro-react-native-babel-preset": "0.48.2",
     "react-test-renderer": "16.6.0-alpha.8af6728"
   },
   "jest": {
     "preset": "react-native",
+    "setupTestFrameworkScriptFile": "./node_modules/jest-enzyme/lib/index.js",
+    "snapshotSerializers": ["enzyme-to-json/serializer"],
+    "setupFiles": [
+      "enzyme-react-16-adapter-setup"
+    ],
     "transform": {
       "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
     }
