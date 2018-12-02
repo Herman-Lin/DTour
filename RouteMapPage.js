@@ -188,8 +188,8 @@ export default class RouteMapPage extends Component{
       let i = this.refs.carousel.currentIndex;
       let focus = this.state.carouselInformation[i];
       this.setState({
-        focusRegion: {latitude: focus.latitude, longitude: focus.longitude, latitudeDelta: 0.0622,
-          longitudeDelta: 0.0421,}
+        focusRegion: {latitude: focus.latitude, longitude: focus.longitude, latitudeDelta: 0.0022,
+          longitudeDelta: 0.0021,}
 
       })
 
