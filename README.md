@@ -50,6 +50,7 @@ input: calls addStop with JSON. --> expected output: private stop coordinate add
 
 ## Testing scenario 5. AddDeleteStopButton
 Test whether the buttons will call the correct functions, checks if it is in the correct state after button is pressed for frontend
+Ensures that even if the code is changed that the functions must be called, even when code changes the state of buttons should change based on being pressed
 
 ```
 input: onPress() for Add button, onPress() for Delete button --> expected output: function on Add called once, function on Delete called once
@@ -58,11 +59,15 @@ input: onPress() for Add button --> expected output: function has addDisabled fa
 
 ```
 ## Testing scenario 6. LocationList
-Test whether it displays a list of Yelp results or Google Address results
+Test whether the results will appear correctly for the search
+There is now no difference between address and yelp
+Checks that for start/stop/destination the search will show results if results are given
+If an invalid flag for which is being searched is called, no results shown
 
 ```
-input: search on start, one Google Address result in addressSuggestion --> expected output: has 0 LocationSuggestion elements
-input: search on stop, one Yelp result in results --> expected output: has 1 LocationSuggestion element
-input: search on destination, one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search on start (-1), one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search on stop (0), one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search on destination(1), one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search invalid (-3), one Yelp result in results --> expected output: has 0 LocationSuggestion elements
 
 ```
