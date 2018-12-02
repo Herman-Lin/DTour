@@ -280,7 +280,7 @@ export default class AddStopPage extends Component{
                                               function (result) {
                                                 this.setState({"results": result});
                                               }.bind(this));
-      // this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false,}); // 0, 1, ... used for index in stopSearchStrings array
+      this.setState({ isLoading: true, currentSearch: index, searchEditable: false, showGenerateButton: false,}); // 0, 1, ... used for index in stopSearchStrings array
       console.log(this.state.routeSuggestions);
     };
 
@@ -334,6 +334,19 @@ export default class AddStopPage extends Component{
         });
        global.stopStorage.setStart(this.state.startLocation.latitude, this.state.startLocation.longitude);
       }, err => console.log(err));
+    }
+
+    onAddStart = (r) => {
+        this.setState({results: []});
+        let result = JSON.parse(r);
+        this.state.startSearchString = result.name;
+        global.stopStorage.setStart(result.coordinates.latitude, result.coordinates.longitude);
+        this.setState({
+                startLocation:{
+                    latitude: result.coordinates.latitude,
+                    longitude: result.coordinates.longitude,
+                }
+        })
     }
 
     onAddDest = (r) => {
@@ -449,7 +462,8 @@ export default class AddStopPage extends Component{
               </View>
             </View>
             <View style={styles.container}>
-                <LocationList addStop={this.onAddStop} 
+                <LocationList addStop={this.onAddStop}
+                    addStart={this.onAddStart}
                     deleteStop={this.onDeleteStop}
                     clickDone={this.onDone}
                     addDest={this.onAddDest} 

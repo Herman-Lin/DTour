@@ -4,6 +4,10 @@ import {View, Text, Image, Button, StyleSheet, TouchableOpacity} from 'react-nat
 
 class LocationSuggestion extends React.Component {
     render() {
+        let isAddress = false;
+        if(this.props.categories[0] !== undefined && this.props.categories[0].title){
+            isAddress = true;
+        }
         return (
             <View style={styles.resultRow}>
                 <Image source={{uri: this.props.image_url}}
@@ -12,7 +16,7 @@ class LocationSuggestion extends React.Component {
                     <Text style={{fontWeight: 'bold'}}>{this.props.name}</Text>
                     <Text>{this.props.rating} | {this.props.price}</Text>
                     <Text>{this.props.categories[0] === undefined ? "" : this.props.categories[0].title}</Text>
-                    <Text>{this.props.display_address}</Text>
+                    <Text> {isAddress ? "" : this.props.display_address}</Text>
                 </View>
                 <View style={{flexDirection: 'column', width: 70, marginTop: 30, marginRight: 5}}>
                     <AddRemoveStopButton addStop={this.props.addStop} deleteStop={this.props.deleteStop} suggestion_json={this.props.suggestion_json}/>
