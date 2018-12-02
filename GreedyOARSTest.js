@@ -1,3 +1,38 @@
+class Stop {
+    /**
+     * @param {String} lat Latitude of the Stop, or Yelp Fusion API json string
+     * @param {Number} long Longitude of the stop, or undefined if using Yelp Fusion API
+     */
+    constructor(lat, long) {
+        if (long === undefined) {
+            this.latitude = JSON.parse(lat).coordinates.latitude;
+            this.longitude = JSON.parse(lat).coordinates.longitude;
+            this.info = JSON.parse(lat);
+        }
+        else {
+            this.latitude = lat;
+            this.longitude = long;
+        }
+    }
+
+    getLatitude() {return this.latitude;}
+    getLongitude() {return this.longitude;}
+    getInfo() {return this.info;}
+    
+    /**
+     * Calculate distance with `anotherStop` based on lat and long.
+     * 
+     * @param {Stop} anotherStop Another Stop
+     * @returns {Number} Euclidean distance of lat and long
+     */
+    lat_long_distance(anotherStop) {
+        return Math.sqrt(
+            Math.pow(this.latitude - anotherStop.getLatitude(), 2) +
+            Math.pow(this.longitude - anotherStop.getLongitude(), 2)
+        );
+    }
+}
+
 class OrAndRouteSuggester {
     /**
      * Abstract method that suggests routes - to be implemented by subclasses
@@ -164,5 +199,15 @@ class GreedyLatLongOrAndRouteSuggester extends OrAndRouteSuggester {
      */
     suggest(start_stop, or_and_stop_arr, end_stop, max_num) {
         // TODO
+        return "not done";
     }
 }
+
+start = new Stop(0,0);
+or_1 = [new Stop(1,0), new Stop(1,1)];
+or_2 = [new Stop(2,0), new Stop(2,1)];
+end = new Stop(2,2);
+
+oars = new GreedyLatLongOrAndRouteSuggester();
+var result = oars.suggest(start, [or_1, or_2], end, 10000);
+console.log(result);
