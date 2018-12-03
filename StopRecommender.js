@@ -1,12 +1,29 @@
+/**
+ * A parameter object that aggregates all the required Yelp Fusion Business
+ * Search API parameters
+ */
 class YelpSearchParameter {
-    constructor(searchStr, latitude, longitude, radius) {
-        this.term = searchStr;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.radius = radius;
-    };
+  /**
+   *
+   * @param {*} searchStr The desire term to be searched
+   * @param {*} latitude The latitude that the search circle is going to base in
+   * @param {*} longitude The longitude that the search circle is going to base in
+   * @param {*} radius The radius of the search circle
+   */
+  constructor(searchStr, latitude, longitude, radius) {
+    this.term = searchStr;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.radius = radius;
+  }
 }
 
+/**
+ * A Recommender object that semi-intelligently search potential stops along the route. 
+ * It can detect if a search term is an address and suggest auto-completed addresses, 
+ * or it can perform multiple Yelp Searches along a given route, to find all the closest
+ * stops along a route given a search term
+ */
 export class StopRecommender {
          constructor() {
            this.radius = 1260; // 15 minutes walking distance (1.4 m/s * 900s)
@@ -19,11 +36,11 @@ export class StopRecommender {
           * Given an user input string and location input, pass the result in the given callback function
           * If user entered an address, the function will use Google Maps Autocomplete instead.
           *
-          * @ param {String} searchStr User input, can be address or a search term
-          * @ param {Array} stops an array of JSON coordinates representing a route, or an object with latitude and longitude attribute to perform normal yelp search
-          *                 if the array consists of only one coordinate, then normal yelp search will be performed
-          * @ param {boolean} nonStop true if start or destination
-          * @ param {function} callback a callback function that handles the suggestion results
+          * @param {String} searchStr User input, can be address or a search term
+          * @param {Array} stops an array of JSON coordinates representing a route, or an object with latitude and longitude attribute to perform normal yelp search
+          *                      if the array consists of only one coordinate, then normal yelp search will be performed
+          * @param {boolean} nonStop true if start or destination
+          * @param {function} callback a callback function that handles the suggestion results
           */
 
          getStopSuggestion(searchStr, stops, nonStop, callback) {
@@ -71,8 +88,6 @@ export class StopRecommender {
              for (var i = 1; i < stops.length; i++) {
                var stop1 = stops[i - 1];
                var stop2 = stops[i];
-               console.log("LOG2 - " + JSON.stringify(stops));
-               console.log("----------");
                // Haversine Formula
                var phi1 = (parseFloat(stop1.latitude) * Math.PI) / 180;
                var phi2 = (parseFloat(stop2.latitude) * Math.PI) / 180;
