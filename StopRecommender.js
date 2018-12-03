@@ -1,13 +1,29 @@
-class YelpSearchParameter {
-    constructor(searchStr, latitude, longitude, radius) {
-        this.term = searchStr;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.radius = radius;
-    };
-}
 /**
- * StopRecommender is used to generate the list of suggestions for the user to select. 
+ * A parameter object that aggregates all the required Yelp Fusion Business
+ * Search API parameters
+ */
+class YelpSearchParameter {
+  /**
+   *
+   * @param {*} searchStr The desire term to be searched
+   * @param {*} latitude The latitude that the search circle is going to base in
+   * @param {*} longitude The longitude that the search circle is going to base in
+   * @param {*} radius The radius of the search circle
+   */
+  constructor(searchStr, latitude, longitude, radius) {
+    this.term = searchStr;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.radius = radius;
+  }
+}
+
+
+/**
+ * A Recommender object that semi-intelligently search potential stops along the route. 
+ * It can detect if a search term is an address and suggest auto-completed addresses, 
+ * or it can perform multiple Yelp Searches along a given route, to find all the closest
+ * stops along a route given a search term
  */
 export class StopRecommender {
          constructor() {
@@ -21,11 +37,11 @@ export class StopRecommender {
           * Given an user input string and location input, pass the result in the given callback function
           * If user entered an address, the function will use Google Maps Autocomplete instead.
           *
-          * @ param {String} searchStr User input, can be address or a search term
-          * @ param {Array} stops an array of JSON coordinates representing a route, or an object with latitude and longitude attribute to perform normal yelp search
-          *                 if the array consists of only one coordinate, then normal yelp search will be performed
-          * @ param {boolean} nonStop true if start or destination
-          * @ param {function} callback a callback function that handles the suggestion results
+          * @param {String} searchStr User input, can be address or a search term
+          * @param {Array} stops an array of JSON coordinates representing a route, or an object with latitude and longitude attribute to perform normal yelp search
+          *                      if the array consists of only one coordinate, then normal yelp search will be performed
+          * @param {boolean} nonStop true if start or destination
+          * @param {function} callback a callback function that handles the suggestion results
           */
 
          getStopSuggestion(searchStr, stops, nonStop, callback) {
@@ -90,10 +106,16 @@ export class StopRecommender {
                for (var j = 0; j < numSearches; j++) {
                  searchQueue.push(new YelpSearchParameter(searchStr, stop1.latitude + dx * j, stop1.longitude + dy * j, this.radius));
                }
+               //console.log("LOG2 - " + stop1.longitude);
+               //console.log("LOG3 - " + stop2.latitude);
+               //console.log("LOG4 - " + stop2.longitude);
+               //console.log("LOG5 - " + dx);
+               //console.log("LOG6 - " + dy);
                searchQueue.push(new YelpSearchParameter(searchStr, stop2.latitude, stop2.longitude, this.radius));
              }
              var searchLeft = searchQueue.length;
              var suggestionSet = new Set();
+             console.log(searchQueue);
              searchQueue.forEach(function(yelpSearchParam) {
                const Http = new XMLHttpRequest();
                var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(yelpSearchParam.term) + "&latitude=" + String(yelpSearchParam.latitude) + "&longitude=" + String(yelpSearchParam.longitude) + "&sort_by=best_match";
@@ -114,7 +136,9 @@ export class StopRecommender {
                      suggestionSet.add(result_json);
                    });
                    searchLeft--;
-                   if (searchLeft == 0) {
+                   console.log("BBBB");
+                   if (searchLeft === 0) {
+                     console.log("CCCC");
                      callback(Array.from(suggestionSet));
                    }
                  }

@@ -565,7 +565,7 @@ export class StopStorage {
            var results = [];
            
            if (this.latLongOrAndRouteSuggester.calculate_worst_case_complexity(this._stops) > 30000) {
-             this.suggester = this.GreedyLatLongOrAndRouteSuggester;
+             this.suggester = this.greedySuggester;
            }
            else {
             this.suggester = this.latLongOrAndRouteSuggester;
