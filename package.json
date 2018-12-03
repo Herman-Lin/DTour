@@ -33,7 +33,9 @@
   "jest": {
     "preset": "react-native",
     "setupTestFrameworkScriptFile": "./node_modules/jest-enzyme/lib/index.js",
-    "snapshotSerializers": ["enzyme-to-json/serializer"],
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
     "setupFiles": [
       "enzyme-react-16-adapter-setup"
     ],

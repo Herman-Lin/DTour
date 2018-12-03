@@ -109,7 +109,7 @@ export default class RouteMapPage extends Component{
           suggestionLength: suggestions.length,
         });
         }
-  
+
         else {
           this.setState({
             suggestionsPolyline: this.state.suggestions[this.state.suggestionIndex].polyline,
@@ -204,18 +204,18 @@ export default class RouteMapPage extends Component{
         if (index < (length - 1)){
           this.setState({
             suggestionIndex: index + 1,
-            
+
           });
           this.mergeLot();
         }
-  
+
         else{
           this.setState({
             suggestionIndex: 0,
           })
           this.mergeLot();
         }
-  
+
       }
 
 
@@ -248,11 +248,11 @@ export default class RouteMapPage extends Component{
                     onPress={() => {
                       this.incrementSuggestionIndex();
                       console.log(this.state.suggestionIndex);
-    
+
                     }}
                     underlayColor='#fff'>
-                  <Icon name={"cached"}  size={40} color="#000" />
-                
+                  <Icon name={"cached"}  size={30} color="#000" />
+
                 </TouchableOpacity>
               <Text style={styles.headerTitle}>Your Trip</Text>
             </View>
@@ -302,9 +302,9 @@ const styles = StyleSheet.create({
         position: 'absolute',
       },
       generateRouteButton: {
-        marginTop: 30,
-        marginLeft: '87%',
-        marginRight: 10,
+        marginTop: 15,
+        marginLeft: 320,
+        // marginRight: 10,
         paddingTop: 5,
         paddingBottom: 5,
         // backgroundColor:'#000',
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
         // shadowOffset: { width: 2, height: 5 },
         // shadowOpacity: 100,
         // shadowRadius: 3,
-       
+
       },
       backButton:{
         marginTop: 10,
