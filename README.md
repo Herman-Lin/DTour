@@ -1,18 +1,19 @@
 # Directory structure of the project
 
 DTour - react-native base folder - run command react-native run-android / run-ios here
+```
+ |_ .git - git init generated folder
+ |_ android - react-native generated Android-compatible app code
+    |_ - react-native generated Android Studio Project Directories
+ |_ components - contains component source code for front-end modules
+ |_ ios - react-native generated iOS-compatible XCode project
+    |_ - react native generated iOS XCode Project Directories
+ |_ node_modules - required libraries, generated after running yarn install
+ |_ out - contains Documentation and Project report related files
+    |_ .. - Contains assets required to run the React web app that supports the usage of web JSDoc
+ |_ test - contains all tests specified below, which can be run with yarn jest when inside the base folder
+```
 
- \|\_ .git - git init generated folder
- \|\_ android - react-native generated Android-compatible app code
-    \|\_ - react-native generated Android Studio Project Directories
- \|\_ components - contains component source code for front-end modules
- \|\_ ios - react-native generated iOS-compatible XCode project
-    \|\_ - react native generated iOS XCode Project Directories
- \|\_ node_modules - required libraries, generated after running yarn install
- \|\_ out - contains Documentation and Project report related files
-    \|\_ .. - Contains assets required to run the React web app that supports the usage of web JSDoc
- \|\_ test - contains all tests specified below, which can be run with yarn jest when inside the base folder
- 
 # Documentation
 Html pages are auto generated when running
 ```
