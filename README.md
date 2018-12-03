@@ -67,7 +67,7 @@ If an invalid flag for which is being searched is called, no results shown
 ```
 input: search on start (-1), one Yelp result in results --> expected output: has 1 LocationSuggestion element
 input: search on stop (0), one Yelp result in results --> expected output: has 1 LocationSuggestion element
-input: search on destination(1), one Yelp result in results --> expected output: has 1 LocationSuggestion element
+input: search on destination (-2), one Yelp result in results --> expected output: has 1 LocationSuggestion element
 input: search invalid (-3), one Yelp result in results --> expected output: has 0 LocationSuggestion elements
 
 ```
