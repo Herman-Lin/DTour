@@ -6,7 +6,9 @@ class YelpSearchParameter {
         this.radius = radius;
     };
 }
-
+/**
+ * StopRecommender is used to generate the list of suggestions for the user to select. 
+ */
 export class StopRecommender {
          constructor() {
            this.radius = 1260; // 15 minutes walking distance (1.4 m/s * 900s)

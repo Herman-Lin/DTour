@@ -1,5 +1,12 @@
 # Directory structure of the project
 
+# Documentation
+Html pages are auto generated when running
+```
+jsdoc [filename with class to document]
+```
+HTML files can be previewed in the out folder
+
 # Testing scnearios
 Please see `test` folder for jest unit testing.
 
