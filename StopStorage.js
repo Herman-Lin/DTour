@@ -566,7 +566,6 @@ export class StopStorage {
            
            if (this.latLongOrAndRouteSuggester.calculate_worst_case_complexity(this._stops) > 30000) {
              this.suggester = this.greedySuggester;
-             console.log("HoNoKAAAA");
            }
            else {
             this.suggester = this.latLongOrAndRouteSuggester;
