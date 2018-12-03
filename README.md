@@ -1,5 +1,19 @@
 # Directory structure of the project
 
+DTour - react-native base folder - run command react-native run-android / run-ios here
+```
+ |_ .git - git init generated folder
+ |_ android - react-native generated Android-compatible app code
+    |_ - react-native generated Android Studio Project Directories
+ |_ components - contains component source code for front-end modules
+ |_ ios - react-native generated iOS-compatible XCode project
+    |_ - react native generated iOS XCode Project Directories
+ |_ node_modules - required libraries, generated after running yarn install
+ |_ out - contains Documentation and Project report related files
+    |_ .. - Contains assets required to run the React web app that supports the usage of web JSDoc
+ |_ test - contains all tests specified below, which can be run with yarn jest when inside the base folder
+```
+
 # Documentation
 Html pages are auto generated when running
 ```
@@ -101,4 +115,32 @@ input: (0,0), {
                 [(1,7)],
                 [(2,6),(1,5),(3,1),(1,1)]
               }, (3,7) --> expected output: 64
+```
+
+## Testing scenario 8. StopRecommender
+Test the behavior of stop suggestion module under multiple scenarios. 
+
+```
+getStopSuggestion()
+input : (
+    "Anime",
+    { latitude: 34.052844, longitude: -118.250294 },
+    true,
+    normalYelpSearchCallback) --> expected output: search result is JSONifyable AND contains the search result "Anime Jungle"
+input : (
+    "333 S Alameda St",
+    { latitude: 34.052844, longitude: -118.250294 },
+    true,
+    addressYelpSearchCallback) --> expected output: result came from Google Maps Autocomplete AND contains the result found in San Clemente, CA.
+input : (
+ "Supermarket",
+    [{ latitude: 34.052844, longitude: -118.250294 }, { latitude: 34.049064, longitude: -118.224575 }, { latitude: 34.047104, longitude: -118.245294 }],
+    false,
+    routedAddressYelpSearchCallback) --> expected output: result will contain Downtown Los Angeles Farmer's Market, which is not within the maximum Yelp radius if searched only by starting, waypoint, and destinations' coordinates but instead covered throughout the route
+   
+input : (
+        "UCLA",
+      [{ latitude: 37.873883, longitude: -122.259142 }, { latitude: 37.869558, longitude: -122.300151 }, { latitude: 37.860344, longitude: -122.299255 }],
+        false,
+        routedAddressYelpSearchCallback) --> expected output: result will not contain anything that is outside the reasonable walking radius
 ```
