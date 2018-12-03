@@ -75,7 +75,7 @@ export class StopRecommender {
                        var result_json = { name: prediction["description"], image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Ic_pin_drop_48px.svg/500px-Ic_pin_drop_48px.svg.png", is_closed: false, review_count: 0, categories: [{ alias: "Address", title: "Address" }], rating: "No Reviews", coordinates: { latitude: response2.result.geometry.location.lat, longitude: response2.result.geometry.location.lng }, price: "$", location: { display_address: [prediction["description"]] } };
                        suggestions.push(result_json);
                        predictionCount--;
-                       if (predictionCount == 0) {
+                       if (predictionCount === 0) {
                          callback(suggestions);
                        }
                      }
@@ -105,16 +105,10 @@ export class StopRecommender {
                for (var j = 0; j < numSearches; j++) {
                  searchQueue.push(new YelpSearchParameter(searchStr, stop1.latitude + dx * j, stop1.longitude + dy * j, this.radius));
                }
-               //console.log("LOG2 - " + stop1.longitude);
-               //console.log("LOG3 - " + stop2.latitude);
-               //console.log("LOG4 - " + stop2.longitude);
-               //console.log("LOG5 - " + dx);
-               //console.log("LOG6 - " + dy);
                searchQueue.push(new YelpSearchParameter(searchStr, stop2.latitude, stop2.longitude, this.radius));
              }
              var searchLeft = searchQueue.length;
              var suggestionSet = new Set();
-             console.log(searchQueue);
              searchQueue.forEach(function(yelpSearchParam) {
                const Http = new XMLHttpRequest();
                var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(yelpSearchParam.term) + "&latitude=" + String(yelpSearchParam.latitude) + "&longitude=" + String(yelpSearchParam.longitude) + "&sort_by=best_match";
@@ -125,7 +119,7 @@ export class StopRecommender {
                    url += "&radius=" + String(40000);
                }
                Http.open("GET", url);
-               Http.setRequestHeader("Authorization", "Bearer " + "nMpM6dLuTMoyzu4q1dCBJPsSSSjqZ9UP7pTrRLbR5PSNni3wcHhZWKbAHRxYRhoosUdTkvmP5-D4HtAUbNLNXyensvOMaUw5nS_raYiV1raMvDNO5_t0-hF7GJH_W3Yx");
+               Http.setRequestHeader("Authorization", "Bearer " + "9_y7FbHpPDh-e2KteBKVaX1t-NEZ6S_QtSW7BnVPHVhhFngTdrNFji2cnrou1ADuAYhmyzUYsel93CR4KlpZsk9xhjLklbXdeGv4e3_N-UT8cqyVDQfo2Eh_qJH_W3Yx");
                Http.send();
                Http.onreadystatechange = e => {
                  if (Http.readyState == 4 && Http.status == 200) {
@@ -135,9 +129,7 @@ export class StopRecommender {
                      suggestionSet.add(result_json);
                    });
                    searchLeft--;
-                   console.log("BBBB");
                    if (searchLeft === 0) {
-                     console.log("CCCC");
                      callback(Array.from(suggestionSet));
                    }
                  }
@@ -145,14 +137,13 @@ export class StopRecommender {
              });
            } else {
              if (stops.constructor === Array) {
-                console.log(stops[0]);
                var latitude = stops[0].latitude;
                var longitude = stops[0].longitude;
              } else {
                var latitude = stops.latitude;
                var longitude = stops.longitude;
              }
-             result = [];
+             var result = [];
              const Http = new XMLHttpRequest();
              var url = "https://api.yelp.com/v3/businesses/search?" + "term=" + encodeURIComponent(searchStr) + "&latitude=" + String(latitude) + "&longitude=" + String(longitude) + "&radius=" + String(this.radius);
              Http.open("GET", url);
@@ -160,7 +151,7 @@ export class StopRecommender {
              Http.send();
              Http.onreadystatechange = e => {
                if (Http.readyState == 4 && Http.status == 200) {
-                 let response = JSON.parse(Http.responseText);
+                 var response = JSON.parse(Http.responseText);
                  response["businesses"].forEach(function(business) {
                    var result_json = { name: business["name"], image_url: business["image_url"], is_closed: business["is_closed"], review_count: business["review_count"], categories: business["categories"], rating: business["rating"], coordinates: business["coordinates"], price: business["price"], location: business["location"] };
                    result.push(result_json);

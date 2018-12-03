@@ -274,6 +274,11 @@ export class LatLongOrAndRouteSuggester extends OrAndRouteSuggester {
     }
 }
 
+
+/**
+ * GreedyLatLongOrAndRouteSuggester is an implementation of the abstract
+ * strategy OrAndRouteSuggester.
+ */
 export class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester {
   /**
    * Public method suggest() calculates Euclidean distance among an array of
@@ -371,7 +376,6 @@ export class GreedyLatLongOrAndRouteSuggester extends LatLongOrAndRouteSuggester
           last_shortest_route = cur_shortest_route;
           or_list_visited[cur_or_list_added] = true;
           num_visited_or_list++;
-          console.log("-----------------------------------------")
       }
 
       return [last_shortest_route];
@@ -583,7 +587,6 @@ export class StopStorage {
              waypoints = waypoints.substring(0, waypoints.length - 1);
              var url = "https://maps.googleapis.com/maps/api/directions/json?origin=" + route[0].latitude + "," + route[0].longitude + "&destination=" + route[route.length - 1].latitude + "," + route[route.length - 1].longitude + "&mode=" + mode + "&waypoints=" + waypoints + "&key=AIzaSyDH6H2IlW_LHCmfh0CV0-aS9aR19XMsn94";
              Http.open("GET", url);
-             // console.log(url);
              Http.send();
              Http.onreadystatechange = e => {
                if (Http.readyState == 4 && Http.status == 200) {

@@ -74,7 +74,6 @@ export default class SearchPage extends Component{
       if (this.state.userLocation.latitude != null && this.state.userLocation.longitude!=null)
        {
          let concatLot = this.state.userLocation.latitude +","+ this.state.userLocation.longitude
-        //console.log(concatLot)
          this.setState({
            concat: concatLot
          }, () => {
@@ -86,12 +85,10 @@ export default class SearchPage extends Component{
 
   
   async getDirections(startLoc, destinationLoc) {
-    // console.log(startLoc, destinationLoc)
     try {
 
       let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyAGujL9LLERhk4Y0N4R4Cbeqww14FDPR60`)
       let respJson = await resp.json();
-      // console.log(respJson);
       let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
       let coords = points.map((point, index) => {
           return  {
@@ -99,8 +96,6 @@ export default class SearchPage extends Component{
               longitude : point[1]
           }
       })
-
-      // console.log(coords)
       this.setState({coords: coords})
       return coords
     } catch(error) {
@@ -108,10 +103,9 @@ export default class SearchPage extends Component{
       return error
    }
   }
-
-
+  
     checkRoute(){
-      console.log(stopStorage.getDestination())
+      // console.log(stopStorage.getDestination())
     }
     
     render(){
