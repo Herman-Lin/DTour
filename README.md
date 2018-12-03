@@ -5,7 +5,8 @@ Html pages are auto generated when running
 ```
 jsdoc [filename with class to document]
 ```
-HTML files can be previewed in the out folder
+Auto generated HTML is available in the out folder
+Also viewable as PDF in the out folder
 
 # Testing scnearios
 Please see `test` folder for jest unit testing.
