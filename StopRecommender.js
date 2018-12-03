@@ -18,6 +18,7 @@ class YelpSearchParameter {
   }
 }
 
+
 /**
  * A Recommender object that semi-intelligently search potential stops along the route. 
  * It can detect if a search term is an address and suggest auto-completed addresses, 

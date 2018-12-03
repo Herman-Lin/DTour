@@ -1,5 +1,13 @@
 # Directory structure of the project
 
+# Documentation
+Html pages are auto generated when running
+```
+jsdoc [filename with class to document]
+```
+Auto generated HTML is available in the out folder
+Also viewable as PDF in the out folder
+
 # Testing scnearios
 Please see `test` folder for jest unit testing.
 
@@ -70,4 +78,27 @@ input: search on stop (0), one Yelp result in results --> expected output: has 1
 input: search on destination (-2), one Yelp result in results --> expected output: has 1 LocationSuggestion element
 input: search invalid (-3), one Yelp result in results --> expected output: has 0 LocationSuggestion elements
 
+```
+
+## Testing scenario 7. GreedyLatLongOrAndRouteSuggester
+Test whether suggest() and calculate_worst_case_complexity() of GreedyLatLongOrAndRouteSuggester suggests routes sorted by greedy approach and return correct Big O complexity.
+
+```
+suggest()
+input: (0,0), { [(1,0), (1,1)], [(2,0)] }, (2,2) --> expected output: (0,0),(1,1),(2,1),(2,2)
+input: (0,0), {
+                [(1,0), (1,4), (3,4)],
+                [(2,1), (2,3), (0,3)],
+                [(1,7)],
+                [(2,6),(1,5),(3,1),(1,1)]
+              }, (3,7) --> expected output: (0,0),(1,4),(2,6),(1,7),(2,1),(3,7)
+
+calculate_worst_case_complexity() 
+input: (0,0), { [] }, (2,2) --> expected output: 0
+input: (0,0), {
+                [(1,0), (1,4), (3,4)],
+                [(2,1), (2,3), (0,3)],
+                [(1,7)],
+                [(2,6),(1,5),(3,1),(1,1)]
+              }, (3,7) --> expected output: 64
 ```
