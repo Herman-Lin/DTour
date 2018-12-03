@@ -71,3 +71,26 @@ input: search on destination (-2), one Yelp result in results --> expected outpu
 input: search invalid (-3), one Yelp result in results --> expected output: has 0 LocationSuggestion elements
 
 ```
+
+## Testing scenario 7. GreedyLatLongOrAndRouteSuggester
+Test whether suggest() and calculate_worst_case_complexity() of GreedyLatLongOrAndRouteSuggester suggests routes sorted by greedy approach and return correct Big O complexity.
+
+```
+suggest()
+input: (0,0), { [(1,0), (1,1)], [(2,0)] }, (2,2) --> expected output: (0,0),(1,1),(2,1),(2,2)
+input: (0,0), {
+                [(1,0), (1,4), (3,4)],
+                [(2,1), (2,3), (0,3)],
+                [(1,7)],
+                [(2,6),(1,5),(3,1),(1,1)]
+              }, (3,7) --> expected output: (0,0),(1,4),(2,6),(1,7),(2,1),(3,7)
+
+calculate_worst_case_complexity() 
+input: (0,0), { [] }, (2,2) --> expected output: 0
+input: (0,0), {
+                [(1,0), (1,4), (3,4)],
+                [(2,1), (2,3), (0,3)],
+                [(1,7)],
+                [(2,6),(1,5),(3,1),(1,1)]
+              }, (3,7) --> expected output: 64
+```
